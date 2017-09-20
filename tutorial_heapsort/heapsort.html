@@ -42,9 +42,8 @@
         two function methods for inserting and extracting heap elements.
 -->
 
-<!--  you will want to uncomment this tag
+<!--  you will want to uncomment this tag (Phil: DONE) -->
 <script src="heap.js"></script>
--->
  
 
 <!--
@@ -75,7 +74,7 @@ function startMeUp () {
 
     // alert will pop up a dialog box with text that will pause execution
     //   until the appropriate user action is taken
-        alert("woo haa");  // you will want to comment out this call
+//        alert("woo haa");  // you will want to comment out this call
  
     // console.log() prints the output of a JavaScript expression to 
     //   the brower's console; and much less distracting than alert
@@ -128,7 +127,7 @@ function startMeUp () {
         minheaper.insert(numbers_heap,numbers[i]);
 
         console.log("appending current heap state to output object");
-        output_string = "heap (insert " + numbers[i] + "): "; //
+        output_string = i + ": heap (insert " + numbers[i] + "): "; //
         for (j=0;j<numbers_heap.length;j++) {
             output_string += numbers_heap[j] + " "; // 
         }
