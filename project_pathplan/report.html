@@ -1,0 +1,295 @@
+<!-- Ya boy Phil's great report -->
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>EECS 567: Project Pathplan Report</title>
+	</head>
+
+	<body>
+		<h1>EECS 567: Project Pathplan Report</h1>
+		<h2>Phillip Ring</h2>
+	</body>
+
+	<p>
+		In this project, we implemented four different path planning algorithms.
+		In this report, I will talk about the implementation of each as well as compare their effectiveness in different situations.
+	</p>
+
+
+	<h2>Situation 1: Empty</h2>
+	
+	<table style="text-align:center;">
+	  <tr>
+		<td>
+			<h2>A*</h2>
+			<img src="screenshots/astar-empty.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>Greedy Best First</h2>
+			<img src="screenshots/gbf-empty.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>BFS</h2>
+			<img src="screenshots/bfs-empty.png" height="400" width="400">
+		</td>
+		<td>
+			<h2>DFS</h2>
+			<img src="screenshots/dfs-empty.png" height="400" width="400">
+		</td>
+	  </tr>
+	</table>
+
+	<p>
+		A* search is a heuristic-based search. It relies on visiting nodes in order of their highest f_score, a metric 
+			that is the sum of the Manhattan/L1 distance from the start node to the current node and the Euclidean/L2 distance
+			from the current node to the end node.<br/>
+		In the empty situation we see the effectiveness of A* in that it is relatively fast, and gives us an optimal solution.
+		A* is characterized by a "searchlight" pattern towards the goal, as if the algorithm itself is fanning out to avoid possible obstacles.<br/>
+	</p>	
+	<p>
+		Greedy Best First Search is another heursitic-based search. It is very similar to A*, in fact, the only difference being that GBF does not 
+			count the Manhattan/L1 distance into its priority heuristic (g_score=0).<br/>
+		GBF shines in the empty situation, as it is very fast when it has a clear path to the goal - as well, it gives an optimal solution.<br/>
+	</p>
+	<p>
+		Breadth-First Search is not a heuristic-based search, rather it keeps a queue of adjacent nodes and searches through them in an attempt 
+			to get to the goal.<br/>
+		BFS ususally takes a very long time to execute yet returns a close to optimal path length.<br/>
+		BFS has a characteristic search strategy, flanging out in a diamond-shaped pattern in an attempt to find the goal.<br/>
+	</p>
+	<p>
+		Depth-First Search is another non-heuristic-based search. Instead of keeping a queue like BFS, DFS keeps a stack of adjacent nodes.<br/>
+		DFS' stack-based approach also takes quite a bit of time, and yields a poor performance. It's path to the goal is characterized by the 
+			snake-like approach. 
+	</p>
+
+
+	<h2>Situation 2: Misc</h2>
+	
+	<table style="text-align:center;">
+	  <tr>
+		<td>
+			<h2>A*</h2>
+			<img src="screenshots/astar-misc.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>Greedy Best First</h2>
+			<img src="screenshots/gbf-misc.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>BFS</h2>
+			<img src="screenshots/bfs-misc.png" height="400" width="400">
+		</td>
+		<td>
+			<h2>DFS</h2>
+			<img src="screenshots/dfs-misc.png" height="400" width="400">
+		</td>
+	  </tr>
+	</table>
+
+	<p>
+		The setup of the Misc situation makes it hard for these four algorithms to optimize on both time and path length.<br/> 
+	</p>
+	<p>
+		A* makes the best optimization on time and path length for this situation, as it is wont to do. The algorithm works a bit slow at first, 
+			but when it gets over the 'hump' of the long section, it dives straight down towards the goal and takes it in style.<br/>
+	</p>
+	<p>
+		GBF starts off going directly towards the goal, and very quickly. Once the path hits the long section to right, the algorithm attempts
+			to find a way around the barrier. In doing so, it grows the visited path in a circle until it can reach over the 'hump'.
+			Once it does that, it makes a beeline for the goal.<br/>
+		GBF shows its weakness here, as it gets stalled for a long time before revealing a non-optimal path.<br/>
+	</p>
+	<p>
+		BFS starts off in its characteristic diamond pattern, and goes about in this direction until it is able to overcome the aforementioned 'hump'.
+			In true BFS fashion, BFS takes the longest time to iterate, but takes the optimal path.<br/>
+		It is also interesting to notice an almost 'diffractive' pattern that BFS takes whilst trying to overcome certain obstacles. The path
+	</p>
+	<p>
+		DFS can finish its search very quickly given a certain situation. The misc situation is ripe for this; the goal just happened to be in the 
+			path of the search pattern.<br/>
+		And again, DFS yields a far from optimal solution.<br/>
+	</p>
+
+
+	<h2>Situation 3: Narrow1</h2>
+	
+	<table style="text-align:center;">
+	  <tr>
+		<td>
+			<h2>A*</h2>
+			<img src="screenshots/astar-narrow1.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>Greedy Best First</h2>
+			<img src="screenshots/gbf-narrow1.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>BFS</h2>
+			<img src="screenshots/bfs-narrow1.png" height="400" width="400">
+		</td>
+		<td>
+			<h2>DFS</h2>
+			<img src="screenshots/dfs-narrow1.png" height="400" width="400">
+		</td>
+	  </tr>
+	</table>
+
+	<p>
+		A*, being the most robust algorithm of the four gets to an optimal solution in good time (though not even close to GBF).
+	</p>
+	<p>
+		GBF shines here, as there is nowhere to get stuck. As the goal is below the narrow channel, GBF's heuristic tells it to initially 
+			search downwards. It doesn't know where any obstacles in the situation are, but thankfully the narrow entry way was in the same
+			direction as the goal.<br/>
+		If the goal were higher than the entryway, than the search would start by jamming in the wall, and encircling itself
+			until it could find an opening to get through (we will see this is the case in Narrow2).<br/>
+	</p>
+	<p>
+		BFS arrives at an optimal solution here, but it takes much more time that A*.<br/> 
+	</p>
+	<p>
+		DFS Takes both a long time to reach the goal, as well as delivers a non-optimal path.<br/>
+		It is interesting to note that if the algorithm 
+			were seeded differently, that is, we input the southern adjacent node into the stack first (and not the northern as is here), the
+			algorithm could have run a few hundred iterations faster. This susceptibility is a major drawback of DFS, among other useless features it has.<br/>
+	</p>
+
+
+	<h2>Situation 4: Narrow2</h2>
+	
+	<table style="text-align:center;">
+	  <tr>
+		<td>
+			<h2>A*</h2>
+			<img src="screenshots/astar-narrow2.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>Greedy Best First</h2>
+			<img src="screenshots/gbf-narrow2.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>BFS</h2>
+			<img src="screenshots/bfs-narrow2.png" height="400" width="400">
+		</td>
+		<td>
+			<h2>DFS</h2>
+			<img src="screenshots/dfs-narrow2.png" height="400" width="400">
+		</td>
+	  </tr>
+	</table>
+
+	<p>
+		A* has a bit of trouble on Narrow2, but it still delivers an optimal path in the second shortest amount of time.<br/>
+		It should be noted that A* is sometimes slower in these situations due to its robustness to obstacles.<br/>
+	</p>
+	<p>
+		GBF shines once again here, as the architecture of the situation allows for easy routing to the goal.<br/>
+	</p>
+	<p>
+		BFS once again delivers an optimal solution here, yet is the slowest in comparison.<br/>
+	</p>
+	<p>
+		DFS also makes it to the goal, but in terrible time and taking a non-optimal path.<br/>
+	</p>
+
+
+
+	<h2>Situation 5: ThreeSections</h2>
+	
+	<table style="text-align:center;">
+	  <tr>
+		<td>
+			<h2>A*</h2>
+			<img src="screenshots/astar-threesections.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>Greedy Best First</h2>
+			<img src="screenshots/gbf-threesections.png" height="400" width="400">
+		</td>	
+		<td>
+			<h2>BFS</h2>
+			<img src="screenshots/bfs-threesections.png" height="400" width="400">
+		</td>
+		<td>
+			<h2>DFS</h2>
+			<img src="screenshots/dfs-threesections.png" height="400" width="400">
+		</td>
+	  </tr>
+	</table>
+
+	<p>
+		The ThreeSections situation makes for a true test of an algorithm's robustness and path optimization.
+	</p>
+	<p>
+		At the expense of not reiterating myself, I will give a brief conclusion of all of the qualities of the algorithms.	
+	</p>
+	<h3>A*</h3>
+	<ul>
+		<li>"Work-horse" of search algorithms</li>
+		<li>Most robust of all</li>
+		<li>Optimal path</li>
+		<li>Optimal or close to optimal time</li>
+			<ul><li>Only GBF does better in some cases</li></ul>
+	</ul>
+	<h3>Greedy Best First</h3>
+	<ul>
+		<li>Optimal path length when straight line path not obstructed</li>
+		<li>If search hits obstacle, algorithm stalls until it can get around the obstacle</li> 
+		<li>Usually fastest time</li>
+	</ul>
+	<h3>BFS</h3>
+	<ul>
+		<li>Characterized by diamond-shaped search pattern</li>
+		<li>Usually slowest search time</li>
+		<li>Optimal path length</li>
+		<ul><li>Usually comes at expense of searching every space and thus observing an optimal path</li></ul>	
+	</ul>
+	<h3>DFS</h3>
+	<ul>
+		<li>Characterized by zig-zagging search pattern</li>
+		<li>Usually slower search time</li>
+		<ul><li>Search time affected by 'seeding' of adjacent nodes</li></ul>
+		<li>Usually least optimal search path</li>
+	</ul>
+
+
+
+
+
+
+
+	<p><br/><br/>Phillip B Ring 2017</p>	
+
+
+
+<!--
+	<ul>
+		<li>A*<br/>
+			<img src="screenshots/astar-empty.png" height="600" width="600">	
+		
+		</li>
+		
+		<li>Greedy Best First<br/>
+			<img src="screenshots/gbf-empty.png" height="600" width="600">	
+		
+		</li>
+
+		<li>BFS<br/>
+			<img src="screenshots/bfs-empty.png" height="600" width="600">	
+
+		</li>
+
+		<li>DFS<br/>
+			<img src="screenshots/dfs-empty.png" height="600" width="600">	
+
+		</li>
+
+	</ul>
+-->
+
+
+
+</html>
+

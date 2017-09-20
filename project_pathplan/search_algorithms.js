@@ -45,6 +45,7 @@ function bfs() {
 			
 			visit_queue.push(neighbors[i]);
 			neighbors[i].queued = true;
+			drawQueuedNode(neighbors[i]);
 		}
 	}
 
@@ -55,7 +56,7 @@ function bfs() {
 	}
 	else if (visit_queue.length>0 && current_node!=q_goal)
 		return "iterating";
-	else  
+	else (search_iter_count == search_max_iterations)  
 		return "failed"; // is this possible?   //   draw_2D_configuration - draws a square at a given location 
 
 
@@ -102,6 +103,7 @@ function dfs() {
 			
 			visit_queue.push(neighbors[i]);
 			neighbors[i].queued = true;
+			drawQueuedNode(neighbors[i]);
 		}
 	}
 
@@ -112,7 +114,7 @@ function dfs() {
 	}
 	else if (visit_queue.length>0 && current_node!=q_goal)
 		return "iterating";
-	else  
+	else (search_iter_count == search_max_iterations)  
 		return "failed"; // is this possible?   //   draw_2D_configuration - draws a square at a given location 
 
     
@@ -166,6 +168,7 @@ function greedyBestFirst() {
 			
 			minheap_insert(visit_queue, neighbors[i]);
 			neighbors[i].queued = true;
+			drawQueuedNode(neighbors[i]);
 		}
 	}
 
@@ -176,7 +179,7 @@ function greedyBestFirst() {
 	}
 	else if (visit_queue.length>0 && current_node!=q_goal)
 		return "iterating";
-	else  
+	else (search_iter_count == search_max_iterations)  
 		return "failed"; // is this possible?   //   draw_2D_configuration - draws a square at a given location 
 
 
@@ -251,7 +254,7 @@ function iterateGraphSearch() {
 	}
 	else if (visit_queue.length>0 && current_node!=q_goal)
 		return "iterating";
-	else  
+	else (search_iter_count == search_max_iterations)  
 		return "failed"; // is this possible?   //   draw_2D_configuration - draws a square at a given location 
 }
 
