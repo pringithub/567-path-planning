@@ -136,7 +136,7 @@ function greedyBestFirst() {
 															   \______/                                                                                                 
 	*/
 
-	// I'm pretty sure GBF is just A* without g_score = 0
+	// I'm pretty sure GBF is just A* without g_score (g_score = 0)
 
 	current_node = minheap_extract(visit_queue); 
 	G[current_node.i][current_node.j].visited = true;
@@ -185,6 +185,66 @@ function greedyBestFirst() {
 
 
 }
+
+
+
+
+
+
+function dijkstras() {
+
+	current_node = minheap_extract(visit_queue); 
+	G[current_node.i][current_node.j].visited = true;
+	draw_2D_configuration([current_node.x,current_node.y]);
+
+	// get adjacent neighbors
+	neighbors = [];
+	if (current_node.i >= 0 && current_node.i < G.length) {
+		if (current_node.j+1 < G[0].length) neighbors.push(G[current_node.i][current_node.j+1]);
+		if (current_node.j-1 >= 0) neighbors.push(G[current_node.i][current_node.j-1]);
+	} 
+	if (current_node.j >= 0 && current_node.j < G[0].length) {
+		if (current_node.i+1 < G.length) neighbors.push(G[current_node.i+1][current_node.j]);
+		if (current_node.i-1 >= 0) neighbors.push(G[current_node.i-1][current_node.j]); 
+	}	
+		
+		
+	for (var i=0; i<neighbors.length; i++) {
+		// filter for non-visited and valid nodes
+		if (!neighbors[i].visited && !neighbors[i].queued && !testCollision([neighbors[i].x,neighbors[i].y])) {
+			distanceCurToNbr = current_node.distance + eps; //incorrect? euclideanDistance([current_node.x,current_node.y],[neighbors[i].x,neighbors[i].y]); 
+			if (neighbors[i].distance > current_node.distance + distanceCurToNbr) {
+				neighbors[i].parent = current_node;
+				neighbors[i].distance = distanceCurToNbr; 
+	
+				g_score = neighbors[i].distance;
+				neighbors[i].priority = g_score; // f_score
+			}
+			
+			minheap_insert(visit_queue, neighbors[i]);
+			neighbors[i].queued = true;
+			drawQueuedNode(neighbors[i]);
+		}
+	}
+
+
+	if ( Math.abs(current_node.x-q_goal[0])<(eps/1000) && Math.abs(current_node.y-q_goal[1])<(eps/1000) ) {
+		drawHighlightedPathGraph(current_node);	
+		return "succeeded"; // check on this
+	}
+	else if (visit_queue.length>0 && current_node!=q_goal)
+		return "iterating";
+	else (search_iter_count == search_max_iterations)  
+		return "failed"; // is this possible?   //   draw_2D_configuration - draws a square at a given location 
+}
+
+
+
+
+
+
+
+
 
 function iterateGraphSearch() {
     // STENCIL: implement a single iteration of a graph search algorithm
