@@ -1,0 +1,11 @@
+
+Tried several times on paper, used MATLAB in the end :)
+
+% EOM_deriv.m
+syms m1 m2 l1 l2 t1 t2 td1 td2 tdd1 tdd2 g tau
+eqn1 = (m1+m2)*l1*tdd1 + m2*l2*tdd2*cos(t1-t2) + m2*l2*td2*td2*sin(t1-t2) + (m1+m2)*g*sin(t1) - tau == 0;
+eqn2 = l2*tdd2 + l1*tdd1*cos(t1-t2) - l1*td1*td1*sin(t1-t2) + g*sin(t2) - tau == 0;
+s = solve([eqn1,eqn2],[tdd1,tdd2]);
+s.tdd1
+s.tdd2
+%

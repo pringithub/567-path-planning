@@ -150,18 +150,19 @@ function animate() {
     else if ( keyboard.pressed("a") )
         pendulum.control += -50.0; // add a motor force to the pendulum motor
 
-    // STENCIL: implement servo controller
-	pendulum.servo.kp = 250;
-	pendulum.servo.kd = 60;
-	pendulum.servo.ki = 5; 
+	else {
+		// STENCIL: implement servo controller
+		pendulum.servo.kp = 250;
+		pendulum.servo.kd = 60;
+		pendulum.servo.ki = 5; 
 
-	error = pendulum.desired - pendulum.angle;
-	accumulated_error += error;
-	derivative_error = (error-prev_error)/dt;
-	pendulum.control = pendulum.servo.kp*error + pendulum.servo.ki*accumulated_error + pendulum.servo.kd*derivative_error;
+		error = pendulum.desired - pendulum.angle;
+		accumulated_error += error; //needs dt, but works! (must be factored in to PID)
+		derivative_error = (error-prev_error)/dt;
+		pendulum.control = pendulum.servo.kp*error + pendulum.servo.ki*accumulated_error + pendulum.servo.kd*derivative_error;
 
-	prev_error = error;
-
+		prev_error = error;
+	}
 
     // toggle activation of servo controller from user interaction
     if (keyboard.pressed("c"))
