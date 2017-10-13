@@ -23,9 +23,87 @@ kineval.robotForwardKinematics = function robotForwardKinematics () {
         return;
     }
 
-    // STENCIL: implement kineval.buildFKTransforms();
-
+    // STENCIL: implement kineval.buildFKTransforms()
+	mstack = [generate_identity()];
+	kineval.buildFKTransforms();
 }
+
+kineval.buildFKTransforms = function traverseFKBase() {
+
+	// if geometries are imported and using ROS coordinates (e.g., fetch),
+    //   coordinate conversion is needed for kineval/threejs coordinates:
+//    if (robot.links_geom_imported) {
+//  		offset_xform = matrix_multiply(generate_rotation_matrix_Y(-Math.PI/2),generate_rotation_matrix_X(-Math.PI/2));
+//	} else {
+//		offset_xform = generate_identity();
+//	}
+//	origin_rpy = generate_column_matrix_from_array(robot.origin.rpy);
+//	initial_rot = matrix_multiply(offset_xform, origin_rpy);	
+	initial_rot = robot.origin.rpy; 
+
+	rot   = generate_rotation_matrix_ZYX(initial_rot);
+	trans = generate_translation_matrix(robot.origin.xyz);
+	xform = matrix_multiply_3(mstack[mstack.length-1],trans,rot);
+	mstack.push(xform);
+	robot.links[robot.base].xform = xform;
+
+	// z-axis?
+	robot_heading = [[0],[0],[1],[1]];
+	// x-axis?
+	robot_lateral = [[1],[0],[0],[1]];
+
+	robot_heading = matrix_multiply(xform, robot_heading);
+	robot_lateral = matrix_multiply(xform, robot_lateral);
+
+	var num_children = robot.links[robot.base].children.length;
+	if (num_children) { // go down the tree 
+		for (var i=0; i<num_children; i++) {
+			traverseFKJoint(robot.links[robot.base].children[i]);
+		}
+	}
+	else { //done with traversal
+		mstack.pop(); // mstack should be eye(4) after
+	}
+}
+function traverseFKLink(link) {
+
+	robot.links[link].xform = mstack[mstack.length-1]; //link has same xform as parent joint
+
+	var num_children = robot.links[link].children.length;
+	if (num_children) { // go down the tree 
+		for (var i=0; i<num_children; i++) {
+			traverseFKJoint(robot.links[link].children[i]);
+		}
+	}
+	//else { // link is a leaf; go up the tree
+}
+function traverseFKJoint(joint) {
+	
+	rot   = generate_rotation_matrix_ZYX(robot.joints[joint].origin.rpy);
+	trans = generate_translation_matrix(robot.joints[joint].origin.xyz);
+	xform = matrix_multiply_3(mstack[mstack.length-1],trans,rot);
+	mstack.push(xform);
+/*
+	// joint_xform = link_xform*R
+	//   R = axis*e1'
+	var axis = robot.joints[joint].axis; 
+	axis = [[axis[0]],[axis[1]],[axis[2]],[1]];//matrix_transpose(axis);
+	var e1_transpose = [[1,0,0,1]];
+	var axis_rot = matrix_multiply(axis, e1_transpose); axis_rot[3][0]=0; 
+	var joint_xform = matrix_multiply(xform,axis_rot);
+	robot.joints[joint].xform = joint_xform;
+*/
+	robot.joints[joint].xform = xform;
+	
+	// all joints have one (?) child - traditionally, at least
+	traverseFKLink(robot.joints[joint].child);
+
+	// returned from Link traversal, so pop xform off stack
+	mstack.pop();
+}
+
+
+
 
     // STENCIL: reference code alternates recursive traversal over 
     //   links and joints starting from base, using following functions: 

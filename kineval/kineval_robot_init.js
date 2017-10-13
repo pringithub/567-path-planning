@@ -41,7 +41,18 @@ kineval.initRobotJoints = function initRobotJoints() {
 
     var x,tempmat;
 
+	// DONE by PHIL
+	for (y in robot.links) {
+		robot.links[y].parent = null;
+		robot.links[y].children = [];
+	}
+//	robot.links["base"].xform = generate_identity();
+
     for (x in robot.joints) {
+
+//		world_trans_mat = generate_translation_matrix(robot.joints[x].origin.xyz);
+//		world_rot_mat   = generate_rotation_matrix_X(robot.joints[x].origin.rpy[0]);
+//		robot.joints[x].xform = matrix_multiply(world_rot_mat,world_trans_mat);
 
         // give the joint its name as an id
         robot.joints[x].name = x;
@@ -55,10 +66,19 @@ kineval.initRobotJoints = function initRobotJoints() {
         robot.joints[x].servo.p_desired = 0;
         robot.joints[x].servo.d_gain = 0; 
 
+
     // STENCIL: complete kinematic hierarchy of robot for convenience.
     //   robot description only specifies parent and child links for joints.
     //   additionally specify parent and child joints for each link
-
+		for (y in robot.links) {
+			if (robot.joints[x].parent == robot.links[y].name) { 
+				robot.links[y].children.push(robot.joints[x].name);
+			}
+			if (robot.joints[x].child == robot.links[y].name) {
+				robot.links[y].parent = robot.joints[x].name;
+				robot.links[y].xform = robot.joints[x].xform;
+			}
+		}
     }
 
 }

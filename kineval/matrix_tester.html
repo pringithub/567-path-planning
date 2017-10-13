@@ -1,0 +1,127 @@
+
+<!-- |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/|
+
+	Example page to test functions in kineval_matrix.js
+
+	Author: Phillip B. Ring
+	Date:   10/7/17
+	
+|\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| |\/| -->
+
+<html>
+
+<head> <meta charset="utf-8"/> </head>
+
+<body>
+
+<p id="text"></p>
+<p><br>This is the end of text</p>
+
+<!-- //////////////////////////////////////////////////
+     /////     JAVASCRIPT INCLUDES
+     ////////////////////////////////////////////////// -->
+<script src="kineval_matrix.js"></script> 
+
+<script>
+
+//////////////////////////////////////////////////
+/////     MAIN FUNCTION CALLS
+//////////////////////////////////////////////////
+
+// start KinEval execution once the page and its resources are loaded
+window.onload = run_test;
+
+function matrix2string(matrix) {
+	s = "";
+	for (var i=0; i<matrix.length; i++)	s += JSON.stringify(matrix[i])+"<br>";
+	return s;
+}
+
+// STENCIL: my_animate is where your robot's controls and movement are updated over time
+function run_test() {
+/*
+	A = generate_identity(4);
+	test_text = "eye(4)";
+	document.getElementById("text").innerHTML = "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	A = generate_translation_matrix(1,2,3);
+	test_text = "trans_mat(1,2,3)";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	A = generate_rotation_matrix_X(Math.PI/2);
+	test_text = "rot_matX(pi/2)";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	A = generate_rotation_matrix_Y(Math.PI/2);
+	test_text = "rot_matY(pi/2)";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	A = generate_rotation_matrix_Z(Math.PI/2);
+	test_text = "rot_matZ(pi/2)";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	u = [3,4,5];
+	vec = vector_normalize(u);
+	test_text = "vector_normalize([3,4,5])";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(vec)+"<br><br>";
+
+	vec = vector_cross(u,u);
+	test_text = "vector_cross([3,4,5],[3,4,5])";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(vec)+"<br><br>";
+
+	u = [3,4,5]; // apparently u was passed by reference above ????
+	v = [5,6,7];
+	vec = vector_cross(u,v);
+	test_text = "vector_cross([3,4,5],[5,6,7])";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(vec)+"<br><br>";
+
+	A = matrix_transpose(generate_translation_matrix(1,2,3));
+	test_text = "transpose t(1,2,3)";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	A = [[1, 2, 3],
+		 [4, 5, 6]];
+	A = matrix_transpose(A);
+	test_text = "transpose mxn";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	A = [[1, 2],
+		 [3, 4]];
+	A = matrix_multiply(A,A);
+	test_text = "mult [1 2;3 4] by itself";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	A = [[1, 2],
+		 [3, 4]];
+	B = [[2],
+		 [2]];
+	A = matrix_multiply(A,B);
+	test_text = "mult [1 2;3 4] by [2;2]";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	A = [];
+	A = matrix_multiply(A,A);
+	test_text = "mult [] by itself";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+
+	A = [[1, 2],
+		 [3, 4]];
+	B = [[2],
+		 [2]];
+	A = matrix_multiply(B,A);
+	test_text = "mult [2;2] by [1 2;3 4]";
+	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
+*/
+
+	A = [0,1,2,3,4,5,6,6];
+	col = generate_column_matrix_from_array(A);
+	row = generate_row_matrix_from_array(A);	
+
+
+}
+
+
+</script>
+</body>
+</html>
+
