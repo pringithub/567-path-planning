@@ -24,36 +24,39 @@ kineval.robotForwardKinematics = function robotForwardKinematics () {
     }
 
     // STENCIL: implement kineval.buildFKTransforms()
+	
+	// if geometries are imported and using ROS coordinates (e.g., fetch),
+	//   coordinate conversion is needed for kineval/threejs coordinates:
+	if (robot.links_geom_imported) {
+		offset_xform = matrix_multiply(generate_rotation_matrix_Y(-Math.PI/2),generate_rotation_matrix_X(-Math.PI/2));
+	} else {
+		offset_xform = generate_identity();
+	}
+	
 	mstack = [generate_identity()];
 	kineval.buildFKTransforms();
 }
 
+
+
 kineval.buildFKTransforms = function traverseFKBase() {
 
-	// if geometries are imported and using ROS coordinates (e.g., fetch),
-    //   coordinate conversion is needed for kineval/threejs coordinates:
-//    if (robot.links_geom_imported) {
-//  		offset_xform = matrix_multiply(generate_rotation_matrix_Y(-Math.PI/2),generate_rotation_matrix_X(-Math.PI/2));
-//	} else {
-//		offset_xform = generate_identity();
-//	}
-//	origin_rpy = generate_column_matrix_from_array(robot.origin.rpy);
-//	initial_rot = matrix_multiply(offset_xform, origin_rpy);	
-	initial_rot = robot.origin.rpy; 
+ 	//console.log(robot.links["base_link"].name);
 
-	rot   = generate_rotation_matrix_ZYX(initial_rot);
+	rot   = generate_rotation_matrix_ZYX(robot.origin.rpy);
 	trans = generate_translation_matrix(robot.origin.xyz);
 	xform = matrix_multiply_3(mstack[mstack.length-1],trans,rot);
-	mstack.push(xform);
-	robot.links[robot.base].xform = xform;
+	geometried_xform = matrix_multiply(xform,offset_xform);
+	mstack.push(geometried_xform);
+	robot.links[robot.base].xform = geometried_xform;
+	//robot.links[robot.base].xform = matrix_multiply(offset_xform, xform);
 
-	// z-axis?
-	robot_heading = [[0],[0],[1],[1]];
-	// x-axis?
-	robot_lateral = [[1],[0],[0],[1]];
-
-	robot_heading = matrix_multiply(xform, robot_heading);
-	robot_lateral = matrix_multiply(xform, robot_lateral);
+	// for scene rendering
+	//robot.origin.xyz = [geometried_xform[0][3], geometried_xform[1][3], geometried_xform[2][3]];
+	var robot_h = [[0],[0],[1],[1]]; // z-axis
+	robot_heading = matrix_multiply(geometried_xform, robot_h);
+	var robot_l = [[1],[0],[0],[1]]; // x-axis
+	robot_lateral = matrix_multiply(geometried_xform, robot_l);
 
 	var num_children = robot.links[robot.base].children.length;
 	if (num_children) { // go down the tree 
@@ -67,6 +70,8 @@ kineval.buildFKTransforms = function traverseFKBase() {
 }
 function traverseFKLink(link) {
 
+ 	//console.log("\t"+robot.links[link].name);
+
 	robot.links[link].xform = mstack[mstack.length-1]; //link has same xform as parent joint
 
 	var num_children = robot.links[link].children.length;
@@ -75,14 +80,25 @@ function traverseFKLink(link) {
 			traverseFKJoint(robot.links[link].children[i]);
 		}
 	}
-	//else { // link is a leaf; go up the tree
+	else { // link is a leaf; go up the tree
+	//	console.log("\n");
+	}
 }
 function traverseFKJoint(joint) {
-	
+
 	rot   = generate_rotation_matrix_ZYX(robot.joints[joint].origin.rpy);
 	trans = generate_translation_matrix(robot.joints[joint].origin.xyz);
 	xform = matrix_multiply_3(mstack[mstack.length-1],trans,rot);
 	mstack.push(xform);
+	robot.joints[joint].xform = xform;
+	
+	// all joints have one (?) child - traditionally, at least
+	traverseFKLink(robot.joints[joint].child);
+
+	// returned from Link traversal, so pop xform off stack
+	mstack.pop();
+}
+
 /*
 	// joint_xform = link_xform*R
 	//   R = axis*e1'
@@ -93,16 +109,6 @@ function traverseFKJoint(joint) {
 	var joint_xform = matrix_multiply(xform,axis_rot);
 	robot.joints[joint].xform = joint_xform;
 */
-	robot.joints[joint].xform = xform;
-	
-	// all joints have one (?) child - traditionally, at least
-	traverseFKLink(robot.joints[joint].child);
-
-	// returned from Link traversal, so pop xform off stack
-	mstack.pop();
-}
-
-
 
 
     // STENCIL: reference code alternates recursive traversal over 

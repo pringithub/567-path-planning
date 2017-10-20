@@ -57,10 +57,22 @@ function generate_row_matrix_from_array(array) {
 
 	return mat;
 }
-// 
+// layers row after row 
 function mat_2_array(mat) {
+	if (mat.length==0 || mat[0].length==0) {
+		throw "arg isn't a matrix, dummy!";
+		exit("arg isn't a matrix, dummy!");
+	}
 
+	arr = [];
+	arrpos = 0;
+	for (var i=0; i<mat.length; i++) {
+		for (var j=0; j<mat[0].length; j++, arrpos++) {
+			arr[arrpos] = mat[i][j];
+		}
+	}
 
+	return arr;
 }
 
 function create_empty_matrix(rows,cols) {
