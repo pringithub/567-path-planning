@@ -1,17 +1,20 @@
 37: Ring,Phillip
 567 EECS F17
 
-Assignment 1 feature 1 (0.00/4): PathPlan_Heap: PENDING
-Assignment 1 feature 2 (0.00/8): PathPlan_AStar: PENDING
-Assignment 1 feature 3 (0.00/2): PathPlan_DFS: PENDING
-Assignment 1 feature 4 (0.00/2): PathPlan_BFS: PENDING
-Assignment 1 feature 5 (0.00/2): PathPlan_BestFirst: PENDING
-Assignment 2 feature 6 (0.00/4): Pendularm_Euler: PENDING
-Assignment 2 feature 7 (0.00/4): Pendularm_VelocityVerlet: PENDING
-Assignment 2 feature 8 (0.00/4): Pendularm_PID: PENDING
-Assignment 2 feature 9 (0.00/1): Pendularm_Verlet: PENDING
-Assignment 2 feature 10 (0.00/2): Pendularm_RK4: PENDING
-Assignment 2 feature 11 (0.00/3): Pendularm_RK4: PENDING
+Assignment 1 feature 1 (4.00/4): PathPlan_Heap: CHECKcomment: graded from working A star search
+Assignment 1 feature 2 (8.00/8): PathPlan_AStar: CHECKcomment: good work
+comment: good report
+Assignment 1 feature 3 (2.00/2): PathPlan_DFS: CHECKcomment: good work
+Assignment 1 feature 4 (2.00/2): PathPlan_BFS: CHECKcomment: good work
+Assignment 1 feature 5 (2.00/2): PathPlan_BestFirst: CHECKcomment: good work
+Assignment 2 feature 6 (4.00/4): Pendularm_Euler: CHECKcomment: good work
+Assignment 2 feature 7 (4.00/4): Pendularm_VelocityVerlet: CHECKcomment: good work
+Assignment 2 feature 8 (4.00/4): Pendularm_PID: CHECKcomment: good work
+comment: excellent gain tuning
+Assignment 2 feature 9 (1.00/1): Pendularm_Verlet: CHECKcomment: good work
+Assignment 2 feature 10 (2.00/2): Pendularm_RK4: CHECKcomment: good work
+Assignment 2 feature 11 (0.00/3): Pendularm_Double: DUEerror: servo cannot be invoked
+comment: uncontrolled double pendulum motion is in place
 Assignment 3 feature 12 (0.00/2): FK_MatrixRoutines: PENDING
 Assignment 3 feature 13 (0.00/8): FK_Transforms: PENDING
 Assignment 3 feature 14 (0.00/2): FK_JointRendering: PENDING
@@ -35,7 +38,7 @@ Assignment 6 feature 31 (0.00/6): MotionPlan_RRTStar: PENDING
 Assignment 7 feature 32 (0.00/12): Pitch: PENDING
 Assignment 7 feature 33 (0.00/6): Pitch_Advanced: PENDING
 Assignment 8 feature 34 (0.00/4): Advanced: PENDING
-Quiz 1: PENDING
+Quiz 1: 2.83 of 4
 Quiz 2: PENDING
 Quiz 3: PENDING
 Quiz 4: PENDING
