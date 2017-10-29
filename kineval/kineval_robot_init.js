@@ -46,13 +46,8 @@ kineval.initRobotJoints = function initRobotJoints() {
 		robot.links[y].parent = null;
 		robot.links[y].children = [];
 	}
-//	robot.links["base"].xform = generate_identity();
 
     for (x in robot.joints) {
-
-//		world_trans_mat = generate_translation_matrix(robot.joints[x].origin.xyz);
-//		world_rot_mat   = generate_rotation_matrix_X(robot.joints[x].origin.rpy[0]);
-//		robot.joints[x].xform = matrix_multiply(world_rot_mat,world_trans_mat);
 
         // give the joint its name as an id
         robot.joints[x].name = x;
@@ -62,9 +57,25 @@ kineval.initRobotJoints = function initRobotJoints() {
         robot.joints[x].control = 0;
         robot.joints[x].servo = {};
     // STENCIL: set appropriate servo gains for arm setpoint control
-        robot.joints[x].servo.p_gain = 0; 
+        robot.joints[x].servo.p_gain = 0.76; // PHIL did this 
         robot.joints[x].servo.p_desired = 0;
         robot.joints[x].servo.d_gain = 0; 
+
+		// PHIL added 10/28
+		// need this here to use for prismatic movement
+		if (robot.joints[x].type == "prismatic") {
+			var axis;
+			// find axis
+			for (var i=0; i<3; i++) {
+				if (robot.joints[x].axis[i] == 1) {
+					axis = i;
+				}
+			}
+			robot.joints[x].limit.upper += robot.joints[x].origin.xyz[axis];
+			robot.joints[x].limit.lower += robot.joints[x].origin.xyz[axis];
+		}
+
+
 
 
     // STENCIL: complete kinematic hierarchy of robot for convenience.

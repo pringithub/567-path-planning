@@ -88,7 +88,12 @@ function traverseFKJoint(joint) {
 
 	rot   = generate_rotation_matrix_ZYX(robot.joints[joint].origin.rpy);
 	trans = generate_translation_matrix(robot.joints[joint].origin.xyz);
-	xform = matrix_multiply_3(mstack[mstack.length-1],trans,rot);
+	xform_before_axisrotation = matrix_multiply_3(mstack[mstack.length-1],trans,rot);
+
+	q = quaternion_from_axisangle(robot.joints[joint].angle,robot.joints[joint].axis); // rotate 0 degrees
+	rot_axis = quaternion_to_rotation_matrix(q);	
+	xform = matrix_multiply(xform_before_axisrotation, rot_axis);
+
 	mstack.push(xform);
 	robot.joints[joint].xform = xform;
 	

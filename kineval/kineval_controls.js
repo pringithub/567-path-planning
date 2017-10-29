@@ -25,13 +25,34 @@ kineval.applyControls = function robot_apply_controls() {
         if (isNaN(robot.joints[x].control))
             console.warn("kineval: control value for " + x +" is a nan"); //+robot.joints[x].control);
 
-        // update joint angles
-        robot.joints[x].angle += robot.joints[x].control;
+//        // update joint angles
+//        robot.joints[x].angle += robot.joints[x].control;
 
-    // STENCIL: enforce joint limits for prismatic and revolute joints
+		switch ( robot.joints[x].type ) {
+			case "continuous":
+				robot.joints[x].angle += robot.joints[x].control;
+				break;
 
+		// STENCIL: enforce joint limits for prismatic and revolute joints
+			case "revolute":
+				robot.joints[x].angle += robot.joints[x].control;
+				var cur_angle = robot.joints[x].angle; 
+				if      (cur_angle > robot.joints[x].limit.upper) robot.joints[x].angle = robot.joints[x].limit.upper;
+				else if (cur_angle < robot.joints[x].limit.lower) robot.joints[x].angle = robot.joints[x].limit.lower;
+				break;
 
-        // clear controls back to zero for next timestep
+			case "prismatic":
+				var axis = 2; // z-axis; TODO: change;here for now
+				robot.joints[x].origin.xyz[axis] += robot.joints[x].control;
+				// limits chagned from urdf for prismatic joints in kineval_robot_init.js
+				if (robot.joints[x].origin.xyz[axis] > (robot.joints[x].limit.upper)) 
+					robot.joints[x].origin.xyz[axis] = robot.joints[x].limit.upper;
+				else if (robot.joints[x].origin.xyz[axis] < (robot.joints[x].limit.lower))
+					robot.joints[x].origin.xyz[axis] = robot.joints[x].limit.lower;
+				break;
+		}
+
+		// clear controls back to zero for next timestep
         robot.joints[x].control = 0;
     }
 

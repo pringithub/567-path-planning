@@ -121,7 +121,7 @@ kineval.handleUserInput = function user_input() {
         textbar.innerHTML = "joint servo controller has been invoked";
         if (kineval.params.update_pd_clock) 
             textbar.innerHTML += "<br>executing clock movement about each joint";
-        if (kineval.params.update_pd_dance) 
+        if (kineval.params.update_pd_dance) //PHIL: since we set this in the GUI, this code will never run; putting it in servo_control.js 
             textbar.innerHTML += "<br>executing dance routine, pose " + kineval.params.dance_pose_index + " of " + kineval.params.dance_sequence_index.length;
     }
     if (kineval.params.update_ik||kineval.params.persist_ik) { 
@@ -246,7 +246,11 @@ kineval.handleUserInput = function user_input() {
         kineval.displayHelp();
     }
 
-
+	// added by PHIL
+	if (keyboard.pressed("t")) {
+		set = JSON.stringify(kineval.setpoints);
+		console.log(set);
+	}
 }
 
 kineval.displayHelp = function display_help () {
