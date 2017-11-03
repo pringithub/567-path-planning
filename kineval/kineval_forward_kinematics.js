@@ -52,11 +52,11 @@ kineval.buildFKTransforms = function traverseFKBase() {
 	//robot.links[robot.base].xform = matrix_multiply(offset_xform, xform);
 
 	// for scene rendering
-	//robot.origin.xyz = [geometried_xform[0][3], geometried_xform[1][3], geometried_xform[2][3]];
+	//   multiply un-geometried xform (why, who knows - magic!)
 	var robot_h = [[0],[0],[1],[1]]; // z-axis
-	robot_heading = matrix_multiply(geometried_xform, robot_h);
+	robot_heading = matrix_multiply(xform, robot_h);
 	var robot_l = [[1],[0],[0],[1]]; // x-axis
-	robot_lateral = matrix_multiply(geometried_xform, robot_l);
+	robot_lateral = matrix_multiply(xform, robot_l);
 
 	var num_children = robot.links[robot.base].children.length;
 	if (num_children) { // go down the tree 
@@ -103,18 +103,6 @@ function traverseFKJoint(joint) {
 	// returned from Link traversal, so pop xform off stack
 	mstack.pop();
 }
-
-/*
-	// joint_xform = link_xform*R
-	//   R = axis*e1'
-	var axis = robot.joints[joint].axis; 
-	axis = [[axis[0]],[axis[1]],[axis[2]],[1]];//matrix_transpose(axis);
-	var e1_transpose = [[1,0,0,1]];
-	var axis_rot = matrix_multiply(axis, e1_transpose); axis_rot[3][0]=0; 
-	var joint_xform = matrix_multiply(xform,axis_rot);
-	robot.joints[joint].xform = joint_xform;
-*/
-
 
     // STENCIL: reference code alternates recursive traversal over 
     //   links and joints starting from base, using following functions: 

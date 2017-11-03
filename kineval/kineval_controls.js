@@ -25,6 +25,7 @@ kineval.applyControls = function robot_apply_controls() {
         if (isNaN(robot.joints[x].control))
             console.warn("kineval: control value for " + x +" is a nan"); //+robot.joints[x].control);
 
+// from stencil code
 //        // update joint angles
 //        robot.joints[x].angle += robot.joints[x].control;
 
@@ -50,6 +51,15 @@ kineval.applyControls = function robot_apply_controls() {
 				else if (robot.joints[x].origin.xyz[axis] < (robot.joints[x].limit.lower))
 					robot.joints[x].origin.xyz[axis] = robot.joints[x].limit.lower;
 				break;
+
+			case "fixed":
+				break;
+
+			// treat un-typed joints as continuous (for mr2 / crawler robots)	
+			default:
+				robot.joints[x].angle += robot.joints[x].control;
+				break;
+
 		}
 
 		// clear controls back to zero for next timestep
