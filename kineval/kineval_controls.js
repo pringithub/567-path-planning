@@ -38,8 +38,10 @@ kineval.applyControls = function robot_apply_controls() {
 			case "revolute":
 				robot.joints[x].angle += robot.joints[x].control;
 				var cur_angle = robot.joints[x].angle; 
-				if      (cur_angle > robot.joints[x].limit.upper) robot.joints[x].angle = robot.joints[x].limit.upper;
-				else if (cur_angle < robot.joints[x].limit.lower) robot.joints[x].angle = robot.joints[x].limit.lower;
+				if (cur_angle > robot.joints[x].limit.upper) 
+					robot.joints[x].angle = robot.joints[x].limit.upper;
+				else if (cur_angle < robot.joints[x].limit.lower) 
+					robot.joints[x].angle = robot.joints[x].limit.lower;
 				break;
 
 			case "prismatic":

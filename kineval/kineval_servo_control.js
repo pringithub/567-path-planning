@@ -37,8 +37,8 @@ kineval.setpointDanceSequence = function execute_setpoints() {
     // if update not requested, exit routine
     if (!kineval.params.update_pd_dance) return; 
 
-	// set setpoints (comment for original routine from "Saturday Night Lights"
-	kineval.setpoints = fetch_dance; 
+	// set setpoints (comment this to play the original routine from "Saturday Night Lights")
+	kineval.setpoints = fetch_dance; // dab on 'em! ooh! 
 
     // STENCIL: implement FSM to cycle through dance pose setpoints
 	for (joint in robot.joints) {
