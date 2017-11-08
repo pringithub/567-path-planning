@@ -29,6 +29,8 @@ kineval.applyControls = function robot_apply_controls() {
 //        // update joint angles
 //        robot.joints[x].angle += robot.joints[x].control;
 
+// could also just have if statement for (revolute or prismatic)
+
 		switch ( robot.joints[x].type ) {
 			case "continuous":
 				robot.joints[x].angle += robot.joints[x].control;
@@ -45,13 +47,12 @@ kineval.applyControls = function robot_apply_controls() {
 				break;
 
 			case "prismatic":
-				var axis = 2; // z-axis; TODO: change;here for now
-				robot.joints[x].origin.xyz[axis] += robot.joints[x].control;
+				robot.joints[x].angle += robot.joints[x].control;
 				// limits chagned from urdf for prismatic joints in kineval_robot_init.js
-				if (robot.joints[x].origin.xyz[axis] > (robot.joints[x].limit.upper)) 
-					robot.joints[x].origin.xyz[axis] = robot.joints[x].limit.upper;
-				else if (robot.joints[x].origin.xyz[axis] < (robot.joints[x].limit.lower))
-					robot.joints[x].origin.xyz[axis] = robot.joints[x].limit.lower;
+				if (robot.joints[x].angle > (robot.joints[x].limit.upper)) 
+					robot.joints[x].angle = robot.joints[x].limit.upper;
+				else if (robot.joints[x].angle < (robot.joints[x].limit.lower))
+					robot.joints[x].angle = robot.joints[x].limit.lower;
 				break;
 
 			case "fixed":

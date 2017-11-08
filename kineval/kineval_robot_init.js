@@ -61,22 +61,6 @@ kineval.initRobotJoints = function initRobotJoints() {
         robot.joints[x].servo.p_desired = 0;
         robot.joints[x].servo.d_gain = 0; 
 
-		// PHIL added 10/28
-		// need this here to use for prismatic movement
-		if (robot.joints[x].type == "prismatic") {
-			var axis;
-			// find axis
-			for (var i=0; i<3; i++) {
-				if (robot.joints[x].axis[i] == 1) {
-					axis = i;
-				}
-			}
-			robot.joints[x].limit.upper += robot.joints[x].origin.xyz[axis];
-			robot.joints[x].limit.lower += robot.joints[x].origin.xyz[axis];
-		}
-
-
-
 
     // STENCIL: complete kinematic hierarchy of robot for convenience.
     //   robot description only specifies parent and child links for joints.

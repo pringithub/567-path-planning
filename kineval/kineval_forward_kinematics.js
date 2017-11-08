@@ -90,9 +90,32 @@ function traverseFKJoint(joint) {
 	trans = generate_translation_matrix(robot.joints[joint].origin.xyz);
 	xform_before_axisrotation = matrix_multiply_3(mstack[mstack.length-1],trans,rot);
 
-	q = quaternion_from_axisangle(robot.joints[joint].angle,robot.joints[joint].axis); // rotate 0 degrees
-	rot_axis = quaternion_to_rotation_matrix(q);	
-	xform = matrix_multiply(xform_before_axisrotation, rot_axis);
+	switch (robot.joints[joint].type) {
+		case 'prismatic':
+			axis = robot.joints[joint].axis;
+			scale = robot.joints[joint].angle;
+			scaled_axis =  [scale*axis[0], scale*axis[1], scale*axis[2]];
+			transformation = generate_translation_matrix(scaled_axis);	
+			break;
+
+		case 'revolute':	
+			// rotate 0 degrees initially 
+			q = quaternion_from_axisangle(robot.joints[joint].angle,robot.joints[joint].axis); 
+			transformation = quaternion_to_rotation_matrix(q);	
+			break;
+
+		case 'continuous':
+			// rotate 0 degrees initially 
+			q = quaternion_from_axisangle(robot.joints[joint].angle,robot.joints[joint].axis); 
+			transformation = quaternion_to_rotation_matrix(q);	
+			break;
+
+		default:
+			transformation = generate_identity();
+			break;
+	
+	}
+	xform = matrix_multiply(xform_before_axisrotation, transformation);
 
 	mstack.push(xform);
 	robot.joints[joint].xform = xform;

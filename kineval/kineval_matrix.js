@@ -40,6 +40,19 @@ function matrix_copy(m1) {
  |_|  |_|\__,_|\__|_|  |_/_/\_\ |_|  |_|\___|\__|_| |_|\___/ \__,_|___/
 ************************************************************************/
 
+/* NOT TESTED */
+function generate_diagonal_matrix_from_array(array) {
+	mat = [];
+	mat[0] = [];
+	for (var i=0; i<array.length; i++) {
+		mat[i][i] = array[i];	
+	}
+
+	return mat;
+}
+
+
+
 function generate_column_matrix_from_array(array) {
 	mat = [];
 	for (var i=0; i<array.length; i++) {
@@ -86,6 +99,27 @@ function create_empty_matrix(rows,cols) {
 
 	return mat;
 }
+
+
+function matrix_subtract(A, B) {
+	// make sure arrays are mxn dimensional, n>0
+	if (A.length==0 || B.length==0 || A[0].length==0 || B[0].length==0)
+		return "matrices not mxn dimensional";
+
+	mat = [];
+	mat[0] = [];
+
+	for (var i=0; i<A.length; i++) {
+		for (var j=0; j<A[0].length; j++) {
+			mat[i][j] = A[i][j]-B[i][j];
+		}
+	}
+
+	return mat;	
+}
+
+
+
 function matrix_multiply(A, B) {
 	// make sure arrays are mxn dimensional, n>0
 	if (A.length==0 || B.length==0 || A[0].length==0 || B[0].length==0)
@@ -117,7 +151,7 @@ function matrix_multiply_3(A,B,C) {
 function matrix_transpose(A) {
 	// make sure arrays are mxn dimensional, n>0
 	if (A.length==0 || A[0].length==0)
-		return "matrices not mxn dimensional";
+		return "A is not a matrix";
 
 	var mat = create_empty_matrix(A[0].length,A.length);
 	for (var i=0; i<A.length; i++) {
@@ -129,10 +163,51 @@ function matrix_transpose(A) {
 	return mat;
 }
 
-
+// NOT TESTED
 function matrix_pseudoinverse(A) {
-	return "not implemented yet";
+	// matrix A with dims nxm: use
+	//   left pseudoinverse for when N>M
+	//   right pseudoinverse fo when N<M
+
+	if (A.length==0 || A[0].length==0)
+		return "A is not a matrix";
+
+	Atrans = matrix_transpose(A);
+
+	// use left pinv
+	if (A.length >= A[0].length) {
+		Atrans_A = matrix_multiply( Atrans, A );
+		Atrans_A__inv = matrix_invert_affine( Atrans_A );
+		Aplus = matrix_multiply( Atrans_A__inv, Atrans ); 
+	}
+	// use right pinv
+	else {
+		A_Atrans = matrix_multiply( A, Atrans );
+		A_Atrans__inv = matrix_invert_affine( A_Atrans );
+		Aplus = matrix_multiply( Atrans, A_Atrans__inv );
+	}
+
+	/* NOT TESTED
+	// pseudoinverse by SVD, just in case
+	out = numeric.svd(A);
+	U = out["U"];
+	D = out["S"];
+	V = out["V"];
+
+	// Dplus is reciprocal of D 
+	Dplus = [];
+	for (var i=0; i<D.length; i++) { Dplus[i] = 1.0/D[i]; };
+	Dplus = generate_diagonal_matrix_from_array(Dplus);
+
+	Aplus = V*Dplus*matrix_transpose(U);
+	*/
+
+	return Aplus;
 }
+
+
+
+
 function matrix_invert_affine(A) {
 	return Math.inv(A);
 }
