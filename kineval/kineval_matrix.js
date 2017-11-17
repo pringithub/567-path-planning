@@ -21,8 +21,8 @@ function matrix_copy(m1) {
     // STENCIL: reference matrix code has the following functions:
     //   ./ matrix_multiply
     //   ./ matrix_transpose
-    //   matrix_pseudoinverse
-    //   matrix_invert_affine (need det and trace first :))
+    //   ./ matrix_pseudoinverse
+    //   ./ matrix_invert_affine (need det and trace first :))
     //   ./ vector_normalize
     //   ./ vector_cross
     //   ./ generate_identity 
@@ -40,7 +40,7 @@ function matrix_copy(m1) {
  |_|  |_|\__,_|\__|_|  |_/_/\_\ |_|  |_|\___|\__|_| |_|\___/ \__,_|___/
 ************************************************************************/
 
-/* NOT TESTED */
+/* NOT TESTED - used for SVD in pseudoinverse */
 function generate_diagonal_matrix_from_array(array) {
 	mat = [];
 	mat[0] = [];
@@ -100,22 +100,39 @@ function create_empty_matrix(rows,cols) {
 	return mat;
 }
 
-
-function matrix_subtract(A, B) {
+function matrix_addsub(A, B, isAdd) {
 	// make sure arrays are mxn dimensional, n>0
 	if (A.length==0 || B.length==0 || A[0].length==0 || B[0].length==0)
-		return "matrices not mxn dimensional";
+		return "A and/or B not matrices";
+	if ( (A.length != B.length) || (A[0].length != B[0].length) )
+		return "matrices must be same size";
 
 	mat = [];
 	mat[0] = [];
 
 	for (var i=0; i<A.length; i++) {
+		mat[i] = [];
 		for (var j=0; j<A[0].length; j++) {
-			mat[i][j] = A[i][j]-B[i][j];
+			if      (isAdd == '+') mat[i][j] = A[i][j]+B[i][j];
+			else if (isAdd == '-') mat[i][j] = A[i][j]-B[i][j]; 
 		}
 	}
 
 	return mat;	
+}
+
+
+function scalar_multiply_matrix(s, mat) {
+
+	newmat = mat;
+
+	for (var i=0; i<mat.length; i++) {
+		for (var j=0; j<mat[0].length; j++) {
+			newmat[i][j] = s*mat[i][j];
+		}
+	}
+
+	return newmat;
 }
 
 
@@ -163,7 +180,6 @@ function matrix_transpose(A) {
 	return mat;
 }
 
-// NOT TESTED
 function matrix_pseudoinverse(A) {
 	// matrix A with dims nxm: use
 	//   left pseudoinverse for when N>M
@@ -209,7 +225,7 @@ function matrix_pseudoinverse(A) {
 
 
 function matrix_invert_affine(A) {
-	return Math.inv(A);
+	return numeric.inv(A);
 }
 
 /***********************************************************************

@@ -14,6 +14,8 @@
 
 <body>
 
+<script src="../js/numeric-1.2.6.js"></script>
+
 <p id="text"></p>
 <p><br>This is the end of text</p>
 
@@ -117,6 +119,17 @@ function run_test() {
 	col = generate_column_matrix_from_array(A);
 	row = generate_row_matrix_from_array(A);	
 
+
+	A = [[4,3],
+		 [2,1]];
+	B = [[3,1],
+		 [1,2]];
+	matrix_subtract(A,B);
+
+	A = [[4,3,2],
+		 [2,1,0]];
+	matrix_pseudoinverse(A);
+	matrix_pseudoinverse(matrix_transpose(A));
 
 }
 
