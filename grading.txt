@@ -26,38 +26,40 @@ Assignment 2 feature 10 (2.00/2): Pendularm_RK4: CHECK
 Assignment 2 feature 11 (0.00/3): Pendularm_Double: DUE
     error: servo cannot be invoked
     comment: uncontrolled double pendulum motion is in place
-Assignment 3 feature 12 (0.00/2): FK_MatrixRoutines: PENDING
-    
-Assignment 3 feature 13 (0.00/8): FK_Transforms: PENDING
-    
-Assignment 3 feature 14 (0.00/2): FK_JointRendering: PENDING
-    
-Assignment 3 feature 15 (0.00/2): FK_BaseOffset: PENDING
-    
+    regrade: servo cannot be invoked
+    comment: uncontrolled double pendulum motion is in place
+Assignment 3 feature 12 (2.00/2): FK_MatrixRoutines: CHECK
+    comment: good work
+Assignment 3 feature 13 (8.00/8): FK_Transforms: CHECK
+    comment: good work
+Assignment 3 feature 14 (2.00/2): FK_JointRendering: CHECK
+    comment: good work
+Assignment 3 feature 15 (2.00/2): FK_BaseOffset: CHECK
+    comment: good work
 Assignment 3 feature 16 (0.00/4): FK_DHTable: PENDING
     
-Assignment 4 feature 17 (0.00/6): FSMDance_Quaternion: PENDING
-    
-Assignment 4 feature 18 (0.00/2): FSMDance_BaseControl: PENDING
-    
-Assignment 4 feature 19 (0.00/2): FSMDance_SetpointControl: PENDING
-    
-Assignment 4 feature 20 (0.00/2): FSMDance_FSM: PENDING
-    
-Assignment 4 feature 21 (0.00/2): FSMDance_JointLimits: PENDING
-    
-Assignment 4 feature 22 (0.00/2): FSMDance_Prismatic: PENDING
-    
-Assignment 4 feature 23 (0.00/2): FK_Rosbridge: PENDING
-    
-Assignment 5 feature 24 (0.00/6): IK_Jacobian: PENDING
-    
-Assignment 5 feature 25 (0.00/3): IK_JTranspose: PENDING
-    
-Assignment 5 feature 26 (0.00/3): IK_JPseudoinverse: PENDING
-    
-Assignment 5 feature 27 (0.00/6): IK_EulerAngles: PENDING
-    
+Assignment 4 feature 17 (6.00/6): FSMDance_Quaternion: CHECK
+    comment: good work
+Assignment 4 feature 18 (2.00/2): FSMDance_BaseControl: CHECK
+    comment: good work
+Assignment 4 feature 19 (2.00/2): FSMDance_SetpointControl: CHECK
+    comment: good work
+Assignment 4 feature 20 (2.00/2): FSMDance_FSM: CHECK
+    comment: good work
+Assignment 4 feature 21 (2.00/2): FSMDance_JointLimits: CHECK
+    comment: good work
+Assignment 4 feature 22 (2.00/2): FSMDance_Prismatic: CHECK
+    comment: good work
+Assignment 4 feature 23 (2.00/2): FK_Rosbridge: CHECK
+    comment: good work
+Assignment 5 feature 24 (6.00/6): IK_Jacobian: CHECK
+    comment: good work
+Assignment 5 feature 25 (3.00/3): IK_JTranspose: CHECK
+    comment: Fetch IK Random Trial Score: 7
+Assignment 5 feature 26 (3.00/3): IK_JPseudoinverse: CHECK
+    comment: good work
+Assignment 5 feature 27 (6.00/6): IK_EulerAngles: CHECK
+    comment: good work
 Assignment 6 feature 28 (0.00/4): MotionPlan_Collision: PENDING
     
 Assignment 6 feature 29 (0.00/2): MotionPlan_2DRRTConnect: PENDING
@@ -73,7 +75,7 @@ Assignment 7 feature 33 (0.00/6): Pitch_Advanced: PENDING
 Assignment 8 feature 34 (0.00/4): Advanced: PENDING
     
 Quiz 1: 2.83 of 4
-Quiz 2: PENDING
-Quiz 3: PENDING
+Quiz 2: 2.50 of 4
+Quiz 3: 3.50 of 4
 Quiz 4: PENDING
 Quiz 5: PENDING
