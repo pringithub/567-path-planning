@@ -40,6 +40,11 @@ function matrix_copy(m1) {
  |_|  |_|\__,_|\__|_|  |_/_/\_\ |_|  |_|\___|\__|_| |_|\___/ \__,_|___/
 ************************************************************************/
 
+
+////////////    MATRIX HELPERS     /////////////////////
+////////////    MATRIX HELPERS     /////////////////////
+////////////    MATRIX HELPERS     /////////////////////
+
 /* NOT TESTED - used for SVD in pseudoinverse */
 function generate_diagonal_matrix_from_array(array) {
 	mat = [];
@@ -100,6 +105,10 @@ function create_empty_matrix(rows,cols) {
 	return mat;
 }
 
+
+
+// A + B
+// A - B
 function matrix_addsub(A, B, isAdd) {
 	// make sure arrays are mxn dimensional, n>0
 	if (A.length==0 || B.length==0 || A[0].length==0 || B[0].length==0)
@@ -121,7 +130,7 @@ function matrix_addsub(A, B, isAdd) {
 	return mat;	
 }
 
-
+// s * A
 function scalar_multiply_matrix(s, mat) {
 
 	newmat = mat;
@@ -136,7 +145,7 @@ function scalar_multiply_matrix(s, mat) {
 }
 
 
-
+// A * B
 function matrix_multiply(A, B) {
 	// make sure arrays are mxn dimensional, n>0
 	if (A.length==0 || B.length==0 || A[0].length==0 || B[0].length==0)
@@ -165,6 +174,8 @@ function matrix_multiply(A, B) {
 function matrix_multiply_3(A,B,C) {
 	return matrix_multiply(A, matrix_multiply(B,C));
 }
+
+// A'
 function matrix_transpose(A) {
 	// make sure arrays are mxn dimensional, n>0
 	if (A.length==0 || A[0].length==0)
@@ -180,6 +191,7 @@ function matrix_transpose(A) {
 	return mat;
 }
 
+// pinv(A)
 function matrix_pseudoinverse(A) {
 	// matrix A with dims nxm: use
 	//   left pseudoinverse for when N>M
@@ -221,12 +233,57 @@ function matrix_pseudoinverse(A) {
 	return Aplus;
 }
 
-
-
-
+// inv(A)
 function matrix_invert_affine(A) {
 	return numeric.inv(A);
 }
+
+
+// LU decomp for matrix inversion and solving linear systems
+function pivotize( mat ) {
+	// TODO: error checking if I care enough
+	
+	n = mat.length;
+	I = generate_identity(); // 4x4 hardcoded - change if necessary
+	for (var j=0; j<n; j++) {
+		
+
+
+	}
+}
+
+function LU_decomp( mat ) {
+	// TODO: error checking if I care enough
+
+	size = [mat.length, mat[0].length];
+	L = create_empty_matrix( size[0], size[1] );
+	U = create_empty_matrix( size[0], size[1] );
+	P = pivotize( mat );
+	A2 = matrix_multiply( P, A );
+
+	for (var j=0; j<size[0]; j++) {
+		L[j][j] = 1.0;
+		for (var i=0; i<j+1; i++) {
+			var sum1=0;
+			for (var k=0; k<i; k++) sum1 += U[k][j]*L[i][k];
+			U[i][j] = A2[i][j] - sum1;
+		}
+		for (var i=j; i<n; i++) {
+			var sum2=0;
+			for (var k=0; k<j; k++) sum2 += U[k][j]*L[i][k];
+			L[i][j] = (A2[i][j] - sum2) / U[j][j];
+		}
+	}
+
+	return [L, U];
+}
+
+
+
+
+
+
+
 
 /***********************************************************************
  __     __        _               __  __      _   _               _     
