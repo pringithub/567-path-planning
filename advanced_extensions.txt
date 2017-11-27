@@ -1,0 +1,11 @@
+
+As 3:
+
+New robot description: COMPLETED (1 pt)
+  - robos/robot_UID.jsi
+
+
+As 5:
+
+IK Random trial - over 100 in under a minute: Completed (1 pt)
+  - movie not put in git, can show in OH
