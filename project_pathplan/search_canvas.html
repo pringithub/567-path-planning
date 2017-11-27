@@ -46,6 +46,7 @@
 <head>
 	<script src="heap.js" type="text/javascript"></script>
 	<script src="search_algorithms.js" type="text/javascript"></script>
+	<script src="rrt_algos.js" type="text/javascript"></script>
 </head>	
 
 
@@ -79,15 +80,19 @@ function initSearch() {
     //search_alg = "breadth-first";  
     //search_alg = "greedy-best-first";  
     //search_alg = "A-star";  
-	search_alg = "dijkstras";
-	//search_alg = "RRT";  
+	//search_alg = "dijkstras";
+	search_alg = "RRT";  
     //search_alg = "RRT-connect";  
     //search_alg = "RRT-star";  
+	//search_alg = "bug0";
+	//search_alg = "bug1";
+	//search_alg = "bug2";
+	//search_alg = "tangentbug";
 
     // specify default the world for the planner 
     //  (stored as "range" global variable with name "planning_scene")
-    //planning_scene = "empty";
-    planning_scene = "misc";
+    planning_scene = "empty";
+    //planning_scene = "misc";
     //planning_scene = "narrow1";
     //planning_scene = "narrow2";
     //planning_scene = "three_sections";
@@ -241,6 +246,18 @@ function animate() {
     		case "dijkstras":
 				search_result = dijkstras();
 				break;
+			case "bug0":
+				search_result = bug0();
+				break;
+			case "bug1":
+				search_result = bug1();
+				break;
+		    case "bug2":
+				search_result = bug2();
+				break;
+			case "tangentbug":
+				search_result = tangentbug();
+				break;
 			case "RRT": 
                 search_result = iterateRRT();
                 break;
@@ -287,49 +304,7 @@ function animate() {
 
 }
 
-function iterateRRT() {
 
-
-    // STENCIL: implement a single iteration of an RRT algorithm.
-    //   An asynch timing mechanism is used instead of a for loop to avoid 
-    //   blocking and non-responsiveness in the browser.
-    //
-    //   Return "failed" if the search fails on this iteration.
-    //   Return "succeeded" if the search succeeds on this iteration.
-    //   Return "extended" otherwise.
-    //
-    //   Provided support functions:
-    //
-    //   testCollision - returns whether a given configuration is in collision
-    //   tree_init - creates a tree of configurations
-    //   insertTreeVertex - adds and displays new configuration vertex for a tree
-    //   insertTreeEdge - adds and displays new tree edge between configurations
-    //   drawHighlightedPath - renders a highlighted path in a tree
-}
-
-function iterateRRTConnect() {
-
-
-    // STENCIL: implement a single iteration of an RRT-Connect algorithm.
-    //   An asynch timing mechanism is used instead of a for loop to avoid 
-    //   blocking and non-responsiveness in the browser.
-    //
-    //   Return "failed" if the search fails on this iteration.
-    //   Return "succeeded" if the search succeeds on this iteration.
-    //   Return "extended" otherwise.
-    //
-    //   Provided support functions:
-    //
-    //   testCollision - returns whether a given configuration is in collision
-    //   tree_init - creates a tree of configurations
-    //   insertTreeVertex - adds and displays new configuration vertex for a tree
-    //   insertTreeEdge - adds and displays new tree edge between configurations
-    //   drawHighlightedPath - renders a highlighted path in a tree
-}
-
-function iterateRRTStar() {
-
-}
 
 //////////////////////////////////////////////////
 /////     STENCIL SUPPORT FUNCTIONS
@@ -578,17 +553,102 @@ function insertTreeEdge(tree,q1_idx,q2_idx) {
 	// 		now sorting on priority
 
 
-//////////////////////////////////////////////////
-/////     RRT IMPLEMENTATION FUNCTIONS
-//////////////////////////////////////////////////
+function iterateRRT() {
 
-    // STENCIL: implement RRT-Connect functions here, such as:
-    //   extendRRT
-    //   connectRRT
-    //   randomConfig
-    //   newConfig
-    //   findNearestNeighbor
-    //   dfsPath
+    // STENCIL: implement a single iteration of an RRT algorithm.
+    //   An asynch timing mechanism is used instead of a for loop to avoid 
+    //   blocking and non-responsiveness in the browser.
+    //
+    //   Return "failed" if the search fails on this iteration.
+    //   Return "succeeded" if the search succeeds on this iteration.
+    //   Return "extended" otherwise.
+    //
+    //   Provided support functions:
+    //
+    //   testCollision - returns whether a given configuration is in collision
+    //   tree_init - creates a tree of configurations
+    //   insertTreeVertex - adds and displays new configuration vertex for a tree
+    //   insertTreeEdge - adds and displays new tree edge between configurations
+    //   drawHighlightedPath - renders a highlighted path in a tree
+
+	q_rand = randomConfig();
+	// draw q_rand for testing
+    ctx.fillStyle = "#0088FF";
+    ctx.fillRect(xformWorldViewX(q_rand[0])-1.5,xformWorldViewY(q_rand[1])-1.5,3,3);
+
+	// result is [ 'word', q_new ]
+	result = extendRRT( T_a, q_rand );
+	
+	if ( result[0] == 'reached' ) {
+//         drawHighlightedPathGraph(current_node);
+         return "succeeded"; 
+    }
+    else if (search_iter_count == search_max_iterations)
+		return "failed"; // TODO: change???
+    else
+        return "extended";
+}
+
+function iterateRRTConnect() {
+
+
+    // STENCIL: implement a single iteration of an RRT-Connect algorithm.
+    //   An asynch timing mechanism is used instead of a for loop to avoid 
+    //   blocking and non-responsiveness in the browser.
+    //
+    //   Return "failed" if the search fails on this iteration.
+    //   Return "succeeded" if the search succeeds on this iteration.
+    //   Return "extended" otherwise.
+    //
+    //   Provided support functions:
+    //
+    //   testCollision - returns whether a given configuration is in collision
+    //   tree_init - creates a tree of configurations
+    //   insertTreeVertex - adds and displays new configuration vertex for a tree
+    //   insertTreeEdge - adds and displays new tree edge between configurations
+    //   drawHighlightedPath - renders a highlighted path in a tree
+
+	q_rand = randomConfig();
+	// draw q_rand for testing
+    ctx.fillStyle = "#0088FF";
+    ctx.fillRect(xformWorldViewX(q_rand[0])-1.5,xformWorldViewY(q_rand[1])-1.5,3,3);
+	
+	// result is [ 'word', q_new ]
+	extendResult = extendRRT( T_a, q_rand );
+
+	if ( extendResult[0] != 'trapped' ) {
+		q_new = extendResult[1];
+		connectResult = connectRRT( T_b, q_new ); 
+
+		if (connectResult[0] == 'reached') {
+		//     drawHighlightedPathGraph(current_node);
+			 return "succeeded"; 
+		}
+	}
+
+	// swap trees
+	var tmp = T_a;
+	T_a = T_b;
+	T_b = tmp;
+
+
+	if (search_iter_count == search_max_iterations)
+		return "failed"; // TODO: change???
+    else
+        return "extended";
+}
+
+function iterateRRTStar() {
+
+}
+
+
+
+
+
+
+
+
 
 </script>
 
