@@ -56,20 +56,23 @@ kineval.poseIsCollision = function robot_collision_test(q) {
     // traverse robot kinematics to test each body for collision
     // STENCIL: implement forward kinematics for collision detection
     //return robot_collision_forward_kinematics(q);
-	result = recursive_robot_traversal( robot.links[robot.base], q );
+	
+	result = collisionFK(q); // generate xforms for hypothetical config q
+	result = recursive_robot_traversal( robot.links[robot.base], robot.links[robot.base].q_xform );
 	return result;
 }
 
-function recursive_robot_traversal( link, q ) {
 
-	result = traverse_collision_forward_kinematics_link( link, link.xform, q ); 
+function recursive_robot_traversal( link, q_xform ) {
+
+	result = traverse_collision_forward_kinematics_link( link, q_xform ); 
 	if ( result != false ) return result; // result is link.name
 
 	child_joints = robot.links[link.name].children;
 	for (var i=0; i<child_joints.length; i++) {
 		child_joint = robot.joints[ child_joints[i] ];
 		link = robot.links[ child_joint.child ];
-		return recursive_robot_traversal( link, q );
+		return recursive_robot_traversal( link, link.q_xform );
 	}
 
 	// gets here if no children
@@ -77,7 +80,7 @@ function recursive_robot_traversal( link, q ) {
 }
 
 
-function traverse_collision_forward_kinematics_link(link,mstack,q) {
+function traverse_collision_forward_kinematics_link(link,mstack) {
 
     // test collision by transforming obstacles in world to link space
 /*
@@ -135,6 +138,109 @@ function traverse_collision_forward_kinematics_link(link,mstack,q) {
 */
     // return false, when no collision detected for this link and children 
     return false;
+}
+
+
+
+
+
+
+// Literally just FK copy and pasted with a few modifications
+//
+
+
+function collisionFK (q) { 
+	// if geometries are imported and using ROS coordinates (e.g., fetch),
+	//   coordinate conversion is needed for kineval/threejs coordinates:
+	if (robot.links_geom_imported) {
+		offset_xform = matrix_multiply(generate_rotation_matrix_Y(-Math.PI/2),generate_rotation_matrix_X(-Math.PI/2));
+	} else {
+		offset_xform = generate_identity();
+	}
+	
+	mstack = [generate_identity()];
+
+	result = collisionFKBase(q);
+//	return result;
+}
+function collisionFKBase (q) {
+	rot   = generate_rotation_matrix_ZYX([q[3],q[4],q[5]]);
+	trans = generate_translation_matrix([q[0],q[1],q[2]]);
+	xform = matrix_multiply_3(mstack[mstack.length-1],trans,rot);
+	geometried_xform = matrix_multiply(xform,offset_xform);
+	mstack.push(geometried_xform);
+	robot.links[robot.base].q_xform = geometried_xform;
+
+
+//	result = traverse_collision_forward_kinematics_link( robot.links[robot.base], geometried_xform );
+//	if (result != false) return result;
+
+
+	var num_children = robot.links[robot.base].children.length;
+	if (num_children) { // go down the tree 
+		for (var i=0; i<num_children; i++) {
+			result = collisionFKJoint(robot.links[robot.base].children[i], q);
+//			if (result != false) return result;
+		}
+	}
+	else { //done with traversal
+		mstack.pop(); // mstack should be eye(4) after
+//		return false;
+	}
+}
+function collisionFKLink (link, q) {
+
+	robot.links[link].q_xform = mstack[mstack.length-1]; //link has same xform as parent joint
+
+//	result = traverse_collision_forward_kinematics_link( robot.links[link], robot.links[link].q_xform );
+//	if (result != false) return result;
+
+
+	var num_children = robot.links[link].children.length;
+	if (num_children) { // go down the tree 
+		for (var i=0; i<num_children; i++) {
+			collisionFKJoint(robot.links[link].children[i], q);
+		}
+	}
+	else {
+//		return false;
+	} // link is a leaf; go up the tree
+
+}
+function collisionFKJoint (joint, q) {
+
+	rot   = generate_rotation_matrix_ZYX(robot.joints[joint].origin.rpy);
+	trans = generate_translation_matrix(robot.joints[joint].origin.xyz);
+	xform_before_axisrotation = matrix_multiply_3(mstack[mstack.length-1],trans,rot);
+
+	if (robot.joints[joint].type == 'prismatic') {
+		axis = robot.joints[joint].axis;
+		scale = q[q_names[joint]];//robot.joints[joint].angle;
+		scaled_axis =  [scale*axis[0], scale*axis[1], scale*axis[2]];
+		transformation = generate_translation_matrix(scaled_axis);	
+	}
+	else if (robot.joints[joint].type == 'revolute' ||
+			 robot.joints[joint].type == 'continuous' || 
+			 typeof robot.joints[joint].type == 'undefined') {
+		// rotate 0 degrees initially 
+		var quat = quaternion_from_axisangle(q[q_names[joint]]/*robot.joints[joint].angle*/,robot.joints[joint].axis); 
+		transformation = quaternion_to_rotation_matrix(quat);	
+	}
+	else {
+		transformation = generate_identity();
+	}
+
+	xform = matrix_multiply(xform_before_axisrotation, transformation);
+
+	mstack.push(xform);
+	robot.joints[joint].q_xform = xform;
+	
+	// all joints have one (?) child - traditionally, at least
+	result = collisionFKLink(robot.joints[joint].child, q);
+//	if (result != false) return result;
+
+	// returned from Link traversal, so pop xform off stack
+	mstack.pop();
 }
 
 

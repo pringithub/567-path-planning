@@ -47,6 +47,7 @@
 	<script src="heap.js" type="text/javascript"></script>
 	<script src="search_algorithms.js" type="text/javascript"></script>
 	<script src="rrt_algos.js" type="text/javascript"></script>
+	<script src="prm.js" type="text/javascript"></script>
 </head>	
 
 
@@ -81,20 +82,21 @@ function initSearch() {
     //search_alg = "greedy-best-first";  
     //search_alg = "A-star";  
 	//search_alg = "dijkstras";
-	search_alg = "RRT";  
+	//search_alg = "RRT";  
     //search_alg = "RRT-connect";  
-    //search_alg = "RRT-star";  
+    search_alg = "RRT-star";  
 	//search_alg = "bug0";
 	//search_alg = "bug1";
 	//search_alg = "bug2";
 	//search_alg = "tangentbug";
+	//search_alg = "prm";
 
     // specify default the world for the planner 
     //  (stored as "range" global variable with name "planning_scene")
-    planning_scene = "empty";
+    //planning_scene = "empty";
     //planning_scene = "misc";
     //planning_scene = "narrow1";
-    //planning_scene = "narrow2";
+    planning_scene = "narrow2";
     //planning_scene = "three_sections";
 
     // specify default eps (epsilon) spatial resolution variable
@@ -152,6 +154,10 @@ function initSearch() {
     // also initialize search tree from goal configuration (RRT-Connect)
     T_b = initRRT(q_goal);
 
+	// initialize cost for RRTStar
+	if (search_alg == "RRT-star") 
+		T_a.vertices[0].cost = 0;
+
     // initialize graph search algorithms (DFS, BFS, A-star) 
     initSearchGraph();
 
@@ -177,7 +183,7 @@ function initSearch() {
 
     // specify minimum number of milliseconds between successive search 
     //   iterations
-    min_msec_between_iterations = 20;
+    min_msec_between_iterations = 2;
 
     // create textbar DOM element for text output to browser window
     textbar = document.createElement('div');
@@ -257,6 +263,9 @@ function animate() {
 				break;
 			case "tangentbug":
 				search_result = tangentbug();
+				break;
+			case "prm":
+				search_result = prm();
 				break;
 			case "RRT": 
                 search_result = iterateRRT();
@@ -494,6 +503,7 @@ function initRRT(q) {
     // maintain index of newest vertex added to tree
     tree.newest = 0;
 
+
     return tree;
 }
 
@@ -512,21 +522,22 @@ function insertTreeVertex(tree,q) {
     draw_2D_configuration(q);
 }
 
-function draw_2D_configuration(q) {
+function draw_2D_configuration(q,color="#8888AA") {
     // draw location of 2D configuration on canvas
     c = document.getElementById("myCanvas");
     ctx = c.getContext("2d");
-    ctx.fillStyle = "#8888AA";
+    ctx.fillStyle = color;
     ctx.fillRect(xformWorldViewX(q[0])-3,xformWorldViewY(q[1])-3,6,6);
 }
 
-function draw_2D_edge_configurations(q1,q2) {
+function draw_2D_edge_configurations(q1,q2,color="black") {
     // draw line between locations of two 2D configurations on canvas
     c = document.getElementById("myCanvas");
     ctx = c.getContext("2d");
     ctx.beginPath();
     ctx.moveTo(xformWorldViewX(q1[0]),xformWorldViewY(q1[1]));
     ctx.lineTo(xformWorldViewX(q2[0]),xformWorldViewY(q2[1]));
+	ctx.strokeStyle=color;
     ctx.stroke();
 }
 
@@ -542,6 +553,29 @@ function insertTreeEdge(tree,q1_idx,q2_idx) {
     draw_2D_edge_configurations(tree.vertices[q1_idx].vertex,tree.vertices[q2_idx].vertex); 
 }
 
+function removeTreeEdge(tree,q1_idx,q2_idx) {
+
+	// remove 1st edge
+	for (var i=0; i<tree.vertices[q1_idx].edges.length; i++) {
+		if (tree.vertices[q1_idx].edges[i] == q2_idx) 
+			tree.vertices[q1_idx].edges.splice(i,1);
+	}
+
+	// remove 2nd edge
+	for (var i=0; i<tree.vertices[q2_idx].edges.length; i++) {
+		if (tree.vertices[q2_idx].edges[i] == q1_idx) 
+			tree.vertices[q2_idx].edges.splice(i,1);
+	}
+
+    // draw edge on canvas
+    draw_2D_edge_configurations(tree.vertices[q1_idx].vertex,tree.vertices[q2_idx].vertex,"red"); 
+}
+
+
+
+
+
+
 //////////////////////////////////////////////////
 /////     MIN HEAP IMPLEMENTATION FUNCTIONS
 //////////////////////////////////////////////////
@@ -551,96 +585,6 @@ function insertTreeEdge(tree,q1_idx,q2_idx) {
 
 	// The functions INSERT and EXTRACT are modified from the 'minheap.js' file
 	// 		now sorting on priority
-
-
-function iterateRRT() {
-
-    // STENCIL: implement a single iteration of an RRT algorithm.
-    //   An asynch timing mechanism is used instead of a for loop to avoid 
-    //   blocking and non-responsiveness in the browser.
-    //
-    //   Return "failed" if the search fails on this iteration.
-    //   Return "succeeded" if the search succeeds on this iteration.
-    //   Return "extended" otherwise.
-    //
-    //   Provided support functions:
-    //
-    //   testCollision - returns whether a given configuration is in collision
-    //   tree_init - creates a tree of configurations
-    //   insertTreeVertex - adds and displays new configuration vertex for a tree
-    //   insertTreeEdge - adds and displays new tree edge between configurations
-    //   drawHighlightedPath - renders a highlighted path in a tree
-
-	q_rand = randomConfig();
-	// draw q_rand for testing
-    ctx.fillStyle = "#0088FF";
-    ctx.fillRect(xformWorldViewX(q_rand[0])-1.5,xformWorldViewY(q_rand[1])-1.5,3,3);
-
-	// result is [ 'word', q_new ]
-	result = extendRRT( T_a, q_rand );
-	
-	if ( result[0] == 'reached' ) {
-//         drawHighlightedPathGraph(current_node);
-         return "succeeded"; 
-    }
-    else if (search_iter_count == search_max_iterations)
-		return "failed"; // TODO: change???
-    else
-        return "extended";
-}
-
-function iterateRRTConnect() {
-
-
-    // STENCIL: implement a single iteration of an RRT-Connect algorithm.
-    //   An asynch timing mechanism is used instead of a for loop to avoid 
-    //   blocking and non-responsiveness in the browser.
-    //
-    //   Return "failed" if the search fails on this iteration.
-    //   Return "succeeded" if the search succeeds on this iteration.
-    //   Return "extended" otherwise.
-    //
-    //   Provided support functions:
-    //
-    //   testCollision - returns whether a given configuration is in collision
-    //   tree_init - creates a tree of configurations
-    //   insertTreeVertex - adds and displays new configuration vertex for a tree
-    //   insertTreeEdge - adds and displays new tree edge between configurations
-    //   drawHighlightedPath - renders a highlighted path in a tree
-
-	q_rand = randomConfig();
-	// draw q_rand for testing
-    ctx.fillStyle = "#0088FF";
-    ctx.fillRect(xformWorldViewX(q_rand[0])-1.5,xformWorldViewY(q_rand[1])-1.5,3,3);
-	
-	// result is [ 'word', q_new ]
-	extendResult = extendRRT( T_a, q_rand );
-
-	if ( extendResult[0] != 'trapped' ) {
-		q_new = extendResult[1];
-		connectResult = connectRRT( T_b, q_new ); 
-
-		if (connectResult[0] == 'reached') {
-		//     drawHighlightedPathGraph(current_node);
-			 return "succeeded"; 
-		}
-	}
-
-	// swap trees
-	var tmp = T_a;
-	T_a = T_b;
-	T_b = tmp;
-
-
-	if (search_iter_count == search_max_iterations)
-		return "failed"; // TODO: change???
-    else
-        return "extended";
-}
-
-function iterateRRTStar() {
-
-}
 
 
 

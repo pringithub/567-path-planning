@@ -90,7 +90,7 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
 
 
     // STENCIL: uncomment and complete initialization function
-	kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
+kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
 
     // form configuration from base location and joint angles
     q_start_config = [
@@ -120,18 +120,22 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
     rrt_iterate = true;
     rrt_iter_count = 0;
 
+
+	// added by PHIL
+    rrt_alg = "RRTConnect";  // "RRT", "RRTConnect", "RRT*" 
+	T_a = tree_init(q_start_config);
+	T_b = tree_init(q_goal_config);
+	search_max_iterations = 2000;
+	path_lock = 0;;
+
     // make sure the rrt iterations are not running faster than animation update
     cur_time = Date.now();
 }
 
 
-
 function robot_rrt_planner_iterate() {
 
-    var i;
-    rrt_alg = 1;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED)
-
-    if (rrt_iterate && (Date.now()-cur_time > 10)) {
+	if (rrt_iterate && (Date.now()-cur_time > 10)) {
         cur_time = Date.now();
 
     // STENCIL: implement single rrt iteration here. an asynch timing mechanism 
@@ -148,36 +152,80 @@ function robot_rrt_planner_iterate() {
     //   tree_add_vertex - adds and displays new configuration vertex for a tree
     //   tree_add_edge - adds and displays new tree edge between configurations
    
-/*
-	if (rrt_alg == 0) {
-	}
-	else (rrt_alg == 1) {
-		q_rand = randomConfig( range );
+
+	// xyz/rpy
+	ranges = [ [robot_boundary[0][0]-3, robot_boundary[1][0]+3],  
+			   [robot_boundary[0][1], robot_boundary[1][1]], // [0,0]
+			   [robot_boundary[0][2]-3, robot_boundary[1][2]+3], 
+			   [0, 0],
+			   [0, 0], 
+			   [0, 0] ];
+	// robot DOFs
+	for (x in robot.joints) ranges.push([0,0/*2*Math.PI*/]); // TODO: change ?? 
+
+
+	if (rrt_alg == "RRT") {
+		q_rand = randomConfig( ranges );
 
 		// result is [ 'word', q_new ]
-        extendResult = extendRRT( T_a, q_rand );		
+		result = extendRRT( T_a, q_rand );
+
+		if ( result[0] == 'advanced' ) {
+			q_new = result[1];
+			if ( euclideanDistance( q_new, q_goal_config ) < 0.5 ) {
+				// draw path 
+				closest_node = T_a.vertices[T_a.newest];
+				findPath( T_a, closest_node, 'RRT' );
+				return "reached";
+			}
+		}
+		else if (rrt_iter_count == search_max_iterations)
+			return "failed"; // TODO: change???
+		else {
+			rrt_iter_count++;
+			return "extended";
+		}
+	}
+    else if (rrt_alg == "RRTConnect") {
+		q_rand = randomConfig( ranges );
+
+		// result is [ 'word', q_new ]
+		extendResult = extendRRT( T_a, q_rand );
 
 		if ( extendResult[0] != 'trapped' ) {
 			q_new = extendResult[1];
 			connectResult = connectRRT( T_b, q_new );
 
-			if (connectResult[0] == 'reached') {
-			//     drawHighlightedPathGraph(current_node);
-				 return "succeeded";
+			if ( connectResult[0] == 'advanced' ) {
+				q_new = connectResult[1];
+			}
+			else if ( connectResult[0] == 'reached' ) {
+			   findPath( T_a, T_a.vertices[T_a.newest], 'RRTConnect' );
+			   findPath( T_b, T_b.vertices[T_b.newest], 'RRTConnect' );
+			   path_lock++;	
+			   return "reached";
 			}
 		}
 
 		// swap trees
 		var tmp = T_a;
 		T_a = T_b;
-		T_b = tmp;	
+		T_b = tmp;
 
-		return "extended";
-	}
-*/	
 	
-	
+		if (rrt_iter_count == search_max_iterations)
+			return "failed"; // TODO: change???
+		else {
+			rrt_iter_count++;
+			return "extended";
+		}
 	}
+	else if (rrt_alg == "RRT*") {
+
+	}
+
+	}	
+	
 
 }
 
@@ -221,14 +269,14 @@ function tree_add_vertex(tree,q) {
     tree.newest = tree.vertices.length - 1;
 }
 
-function add_config_origin_indicator_geom(vertex) {
+function add_config_origin_indicator_geom(vertex, _color=0xffff00) {
 
     // create a threejs rendering geometry for the base location of a configuration
     // assumes base origin location for configuration is first 3 elements 
     // assumes vertex is from tree and includes vertex field with configuration
 
     temp_geom = new THREE.CubeGeometry(0.1,0.1,0.1);
-    temp_material = new THREE.MeshLambertMaterial( { color: 0xffff00, transparent: true, opacity: 0.7 } );
+    temp_material = new THREE.MeshLambertMaterial( { color: _color, transparent: true, opacity: 0.7 } );
     temp_mesh = new THREE.Mesh(temp_geom, temp_material);
     temp_mesh.position.x = vertex.vertex[0];
     temp_mesh.position.y = vertex.vertex[1];
@@ -254,6 +302,7 @@ function tree_add_edge(tree,q1_idx,q2_idx) {
 //////////////////////////////////////////////////
 
 
+
     // STENCIL: implement RRT-Connect functions here, such as:
     //   rrt_extend
     //   rrt_connect
@@ -265,54 +314,93 @@ function tree_add_edge(tree,q1_idx,q2_idx) {
     //   path_dfs
 
 
-// why does this exist ???
-function extendRRT_4CONNECT( T, q ) {
 
+global_step_length = 0.25;
+
+function extendRRT( T, q ) {
 	q_near_idx = findNearestNeighborIdxInTree( T, q );
-	q_near = T.vertices[q_near_idx].vertex;
-	q_new = newConfig( q, q_near );
-	if (q_new != 'invalid') {
-		insertTreeVertex( T, q_new );
-		insertTreeEdge( T, q_near_idx, T.newest );
+    q_near = T.vertices[q_near_idx].vertex;
+    q_new = newConfig( q_near, q );
+    if (q_new != 'invalid') {
+		tree_add_vertex( T, q_new );
+        tree_add_edge( T, q_near_idx, T.newest );
 
-		if ( Math.abs(q_new[0]-q[0])<(eps) && Math.abs(q_new[1]-q[1])<(eps) ) 
-			result = 'reached'; // to reach goal; reaching other tree is different
-		else 
-			result = 'advanced';
+		T.vertices[T.newest].parent_idx = q_near_idx;
+
+		result = 'advanced';
+    }
+    else
+        result = 'trapped';
+
+    return [ result, q_new ];
+}
+
+function connectRRT( T, q_target ) {
+
+    do {
+        result = extendRRT( T, q_target );
+
+        q_new = result[1];
+        if ( euclideanDistance( q_new, q_target ) < 0.7 )
+            result = ['reached'];
+
+    } while (result[0] == 'advanced');
+
+    return result;
+}
+
+
+
+
+// now works for n-dimensions!
+function euclideanDistance( q1, q2 ) { 
+	vec = [];
+	sum_squared = 0;
+	for (var i=0; i<q1.length; i++) { 
+		vec[i] = q1[i]-q2[i]; // subtract
+		sum_squared += Math.pow(vec[i],2);
 	}
-	else 
-		result = 'trapped';
+	norm = Math.sqrt(sum_squared); 
+	return norm;
+}
+		
 
-	return [ result, q_new ];
+function randomConfig( ranges ) {
+
+	// Input: ranges ( nx2 matrix )
+	// Output: new nx1 config
+	//
+
+	q_rand = [];
+	for (var i=0; i<ranges.length; i++) {
+		q_rand[i] = (Math.random()*(ranges[i][1]-ranges[i][0])+ranges[i][0]);
+	}
+
+	return q_rand;
 }
 
-function connectRRT_4CONNECT( T, q_new ) {
+function newConfig( q_start, q_target, step_length=global_step_length ) {
 
-	do {
-		result = extendRRT( T, q_new );
+	norm = euclideanDistance( q_start, q_target );
+	
+	q_new = [];
+	for (var i=0; i<q_start.length; i++) {
+		normalized_elt = (q_target[i]-q_start[i])/norm;
+		q_new[i] = step_length * normalized_elt + q_start[i];	
+	}
 
-	} while (result[0] == 'advanced');
+	isCollision = kineval.poseIsCollision( q_new );
+//	console.log(isCollision);
+	if (isCollision != false) q_new = 'invalid';
 
-	return result;
+	return q_new;
 }
 
-
-// input args 2=elt arrays of min/max
-function randomConfig(minmaxX,minmaxY) {
-	rangeX = minmaxX[1]-minmaxX[0];
-	rangeY = minmaxY[1]=minmaxY[0];
-	return [(Math.random() * rangeX) + minmaxX[0], 
-		    (Math.random() * rangeY) + minmaxY[0]];
-
-	//	return [(Math.random() * 6) - 1, (Math.random() * 6) - 1]; // G is from [-2,7]
-}
-
-// q must be an array of [ x_loc, y_loc ]
-function findNearestNeighborIdxInTree( T_a, q ) {
+function findNearestNeighborIdxInTree( T, q ) {
 
 	minDistanceToRandNode = Infinity;
-	for (var i=0; i<T_a.vertices.length; i++) {
-		distanceToRandNode = euclideanDistance( T_a.vertices[i].vertex, q );
+	for (var i=0; i<T.vertices.length; i++) {
+		distanceToRandNode = euclideanDistance( T.vertices[i].vertex, q );
 		if (distanceToRandNode < minDistanceToRandNode) {
 			minDistanceToRandNode = distanceToRandNode;
 			closest_idx = i;
@@ -322,45 +410,169 @@ function findNearestNeighborIdxInTree( T_a, q ) {
 	return closest_idx; 
 }
 
-function newConfig( q_rand, q_near ) {
+function findPath( T, node, planner='RRT' ) {
+	if (path_lock != 0) return; // here for dumb browser bullshit
 
-	// get angle wrt +x axis
-	q_inter = [q_rand[0], q_near[1]];
-	delta_rise = q_inter[1]-q_rand[1]; // keep cartesian coords even though canvas doesn't respect it
-	delta_run = q_inter[0]-q_near[0];
-	angle = Math.atan2(delta_rise,delta_run);
+	arr = [];
+	do {
+		arr.unshift( node ); // prepend
+		add_config_origin_indicator_geom(node,0x0000ff);
+		node = T.vertices[node.parent_idx];
+	} while (typeof node != 'undefined');
+	
 
-	step_length = 0.1;
-	e0 = [ step_length, 0 ];
-	rotated = rotateVector2D( e0, angle );
-	q_new = [ q_near[0]+rotated[0], q_near[1]-rotated[1] ]; 
+	if (planner == 'RRT') {
+		// add in goal
+		tree_add_vertex( T, q_goal_config );
+		add_config_origin_indicator_geom(T.vertices[T.newest],0x0000ff);
+		arr.push( T.vertices[T.newest] );
 
-	near2new = euclideanDistance(q_near, q_new);	
-	if (near2new != step_length) {
-//		throw "fuck";
+		kineval.motion_plan = arr;
+	}
+	else if (planner == 'RRTConnect') { 
+
+		var goalTree=false;
+		for (var i=0; i<T.vertices.length; i++) {
+			if (T.vertices[i].vertex == q_goal_config) {
+				goalTree = true;
+				break;
+			}
+		}
+
+		if (typeof waiter == 'undefined') {
+			waiter = arr;
+		}
+		else {
+			if (goalTree) {
+				for (var i=0; i<waiter.length; i++) kineval.motion_plan.push( waiter[i] ); // waiter is start tree
+				for (var i=0; i<arr.length; i++) kineval.motion_plan.push( arr[arr.length-1-i] );
+			}
+			else { 
+				for (var i=0; i<arr.length; i++) kineval.motion_plan.push( arr[i] );
+				for (var i=0; i<waiter.length; i++) kineval.motion_plan.push( waiter[waiter.length-1-i] );
+			}	
+		}
+
+
+
+		/*
+		var goalTree=false;
+		for (var i=0; i<T.vertices.length; i++) {
+			if (T.vertices[i].vertex == q_goal_config) {
+				goalTree = true;
+				break;
+			}
+		}
+
+		if (goalTree) {
+			if (kineval.motion_plan.length == 0) { // goalTree is first
+				waiter = [];
+				for (var i=0; i<arr.length; i++) waiter.unshift( arr[i] );
+			}
+			else 
+				for (var i=0; i<arr.length; i++) kineval.motion_plan.unshift( arr[i] );
+		} else {
+			if (typeof waiter == 'undefined') // startTree is first 
+				for (var i=0; i<arr.length; i++) kineval.motion_plan.push( arr[i] );
+			else
+				for (var i=0; i<waiter.length; i++) kineval.motion_plan.push( waiter[i] );
+		}
+		*/
 	}
 
-	if (testCollision(q_new)) {
-		q_new = 'invalid';
+
+}
+
+
+
+
+//////////////
+//  For RRT* 
+//////////////
+
+function nearestNeighbors( T, q_new, neighbor_range=global_neighbor_range ) {
+	
+	nearestIdxs = [];
+	for (var i=0; i<T.vertices.length; i++) {
+		if ( euclideanDistance( T.vertices[i].vertex, q_new ) < neighbor_range ) {
+			nearestIdxs.push(i);
+		}
 	}
+
+	return nearestIdxs;
+}
+
+
+// choose the nearest neighbor that minimizes the (neighbor's cost + nbr2new cost) heuristic
+function chooseParent( T, Z_near, z_nearest_idx, z_new, x_new ) {
+	
+	z_min = z_nearest_idx;
+	c_min = T.vertices[z_nearest_idx].cost + 
+		euclideanDistance( T.vertices[z_nearest_idx].vertex, z_new );
+
+	for (var i=0; i<Z_near.length; i++) {
+	
+		// TODO: make sure no obstacles yet
+
+		c_prime = T.vertices[Z_near[i]].cost + 
+			euclideanDistance( T.vertices[Z_near[i]].vertex, z_new );
+
+		if (c_prime < c_min) {
+			z_min = Z_near[i];
+			c_min = c_prime;
+		}
+	}
+
+	return [z_min, c_min];
+}
+
+function rewire(T, Z_near, z_min_idx, z_new_idx) {
+	
+	// see if it is less costly to go from new to near; if so, rewire
+	for (var i=0; i<Z_near.length; i++) {
+	if (Z_near[i] != z_min_idx) {
+		var z_new_cost = T.vertices[z_new_idx].cost;
+		var z_new_2_z_near = euclideanDistance( T.vertices[z_new_idx].vertex, 
+												T.vertices[Z_near[i]].vertex);
+		var z_near_cost = T.vertices[Z_near[i]].cost; // current cost of the near / neighbor
+		
+		// make sure the path is clear
+		var pathCollision=false;
+		// below condition will always be 0 or 1; may need to change to be robust
+		for (var j=0; j<Math.floor(z_new_2_z_near*(1/global_step_length)); j++) { 			
+			z_test = steer( T, z_new_idx, T.vertices[Z_near[i]].vertex );
+			if (z_test == 'invalid') pathCollision = true;	
+		}
+		
+		if ( !pathCollision && ((z_new_cost + z_new_2_z_near) < z_near_cost) ) 
+			T = reconnect(T,Z_near[i],z_new_idx);
+	}
+	}
+
+	return T;
+}
+
+function reconnect( T, z_near, z_new ) {
+
+	// remove edge between near and near's parent
+	removeTreeEdge( T, T.vertices[z_near].parent_idx, z_near );
+
+	// change parent
+	T.vertices[z_near].parent_idx = z_new;
+
+	// add new edge
+	insertTreeEdge( T, z_new, z_near ); 
+
+	return T;
+}
+
+function steer( T, q_near_idx, q_rand ) {
+
+	q_near = T.vertices[q_near_idx].vertex;
+	q_new = newConfig( q_near, q_rand );
 
 	return q_new;
 }
-
-function rotateVector2D(v, theta) {
-	// [ [cos(theta), -sin(theta)],
-	//   [sin(theta), cos(theta) ];
-	
-	return [ Math.cos(theta)*v[0] - Math.sin(theta)*v[1],
-			 Math.sin(theta)*v[0] + Math.cos(theta)*v[1] ];
-}
-
-
-
-
-
-
-
 
 
 

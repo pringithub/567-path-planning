@@ -364,6 +364,3 @@ function bug1() {
 }
 
 
-
-
-
