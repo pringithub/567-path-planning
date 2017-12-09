@@ -122,7 +122,7 @@ kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
 
 
 	// added by PHIL
-    rrt_alg = "RRTConnect";  // "RRT", "RRTConnect", "RRT*" 
+    rrt_alg = "RRTConnect";
 	T_a = tree_init(q_start_config);
 	T_b = tree_init(q_goal_config);
 	search_max_iterations = 2000;
@@ -161,7 +161,24 @@ function robot_rrt_planner_iterate() {
 			   [0, 0], 
 			   [0, 0] ];
 	// robot DOFs
-	for (x in robot.joints) ranges.push([0,0/*2*Math.PI*/]); // TODO: change ?? 
+	for (x in robot.joints) {
+		if (typeof robot.joints[x].limit != 'undefined') 
+			ranges.push( [robot.joints[x].limit.lower, robot.joints[x].limit.upper] );
+		else {
+			if (robot.joints[x].type != 'fixed')
+				ranges.push( [-2*Math.PI, 2*Math.PI] );
+			else  // ow it can't move
+				ranges.push( [0,0] );
+		}
+	}
+		
+//		for (x in robot.joints) ranges.push([0,0]); 
+		// TODO: change to joint limits ??
+															 // I argue that since we are going to a goal state of 
+		// 														zeros, there is no need to flail about wildly -
+		// 														 this should be sufficient and I have not heard otherwise
+		// 														as well, there is inherent respect to joint limits here,
+		// 														given that we start in a valid configuration
 
 
 	if (rrt_alg == "RRT") {
@@ -220,11 +237,65 @@ function robot_rrt_planner_iterate() {
 			return "extended";
 		}
 	}
+
 	else if (rrt_alg == "RRT*") {
+		z_rand = randomConfig(ranges);
+		
+		z_nearest_idx = findNearestNeighborIdxInTree( T_a, z_rand );
+		z_new = steer( T_a, z_nearest_idx, z_rand ); 	
+		if (z_new != 'invalid') { // 'invalid' set in newConfig
+			Z_near = nearestNeighbors( T_a, z_new );
+			[z_min_idx,c_min] = chooseParent( T_a, Z_near, z_nearest_idx, z_new );
+
+			
+			tree_add_vertex( T_a, z_new );
+			tree_add_edge( T_a, z_min_idx, T_a.newest );
+//			insertTreeVertex( T_a, z_new );
+//			insertTreeEdge( T_a, z_min_idx, T_a.newest ); // T.newest = z_new_idx
+
+			// make best one parent
+			T_a.vertices[T_a.newest].parent_idx = z_min_idx;
+			// add current cost
+			T_a.vertices[T_a.newest].cost = c_min;
+
+			z_new_idx = T_a.newest;
+			T_a = rewire( T_a, Z_near, z_min_idx, z_new_idx );
+		}
+
+
+		RRTStarOptimal = false;
+		if (RRTStarOptimal) {
+			if ( z_new!='invalid' && euclideanDistance( z_new, q_goal_config ) < 0.5 ) {
+				z_final = z_new;
+			}
+			
+			if (rrt_iter_count == search_max_iterations) {
+				if (typeof z_final == 'undefined') 
+					return "failed"; // TODO: change???
+				else {
+					findPath( T_a, T_a.vertices[z_final] );
+					return "reached";
+				}
+			}
+					
+			return "extended";
+		}
+		else {
+			if ( z_new!='invalid' && euclideanDistance( z_new, q_goal_config ) < 0.5 ) {
+				findPath( T_a, T_a.vertices[T_a.newest] ); // T.newest is z_new	
+				return "reached";
+			}
+			else if (rrt_iter_count == search_max_iterations)
+				return "failed"; // TODO: change???
+			else
+				return "extended";
+		}
 
 	}
 
-	}	
+
+
+	} // if (rrt_iterate)	
 	
 
 }
@@ -296,6 +367,24 @@ function tree_add_edge(tree,q1_idx,q2_idx) {
 
     // can draw edge here, but not doing so to save rendering computation
 }
+function tree_remove_edge(tree,q1_idx,q2_idx) {
+
+    // remove 1st edge
+    for (var i=0; i<tree.vertices[q1_idx].edges.length; i++) {
+        if (tree.vertices[q1_idx].edges[i] == q2_idx)
+            tree.vertices[q1_idx].edges.splice(i,1);
+    }
+
+    // remove 2nd edge
+    for (var i=0; i<tree.vertices[q2_idx].edges.length; i++) {
+        if (tree.vertices[q2_idx].edges[i] == q1_idx)
+            tree.vertices[q2_idx].edges.splice(i,1);
+    }
+
+    // can draw edge here, but not doing so to save rendering computation
+}
+
+
 
 //////////////////////////////////////////////////
 /////     RRT IMPLEMENTATION FUNCTIONS
@@ -316,6 +405,7 @@ function tree_add_edge(tree,q1_idx,q2_idx) {
 
 
 global_step_length = 0.25;
+global_neighbor_range = 2*global_step_length;
 
 function extendRRT( T, q ) {
 	q_near_idx = findNearestNeighborIdxInTree( T, q );
@@ -421,7 +511,7 @@ function findPath( T, node, planner='RRT' ) {
 	} while (typeof node != 'undefined');
 	
 
-	if (planner == 'RRT') {
+	if (planner == 'RRT' || planner == 'RRT*') {
 		// add in goal
 		tree_add_vertex( T, q_goal_config );
 		add_config_origin_indicator_geom(T.vertices[T.newest],0x0000ff);
@@ -453,32 +543,7 @@ function findPath( T, node, planner='RRT' ) {
 			}	
 		}
 
-
-
-		/*
-		var goalTree=false;
-		for (var i=0; i<T.vertices.length; i++) {
-			if (T.vertices[i].vertex == q_goal_config) {
-				goalTree = true;
-				break;
-			}
-		}
-
-		if (goalTree) {
-			if (kineval.motion_plan.length == 0) { // goalTree is first
-				waiter = [];
-				for (var i=0; i<arr.length; i++) waiter.unshift( arr[i] );
-			}
-			else 
-				for (var i=0; i<arr.length; i++) kineval.motion_plan.unshift( arr[i] );
-		} else {
-			if (typeof waiter == 'undefined') // startTree is first 
-				for (var i=0; i<arr.length; i++) kineval.motion_plan.push( arr[i] );
-			else
-				for (var i=0; i<waiter.length; i++) kineval.motion_plan.push( waiter[i] );
-		}
-		*/
-	}
+	} // RRTConnect
 
 
 }
@@ -555,13 +620,15 @@ function rewire(T, Z_near, z_min_idx, z_new_idx) {
 function reconnect( T, z_near, z_new ) {
 
 	// remove edge between near and near's parent
-	removeTreeEdge( T, T.vertices[z_near].parent_idx, z_near );
+//	removeTreeEdge( T, T.vertices[z_near].parent_idx, z_near );
+	tree_remove_edge( T, T.vertices[z_near].parent_idx, z_near );	
 
 	// change parent
 	T.vertices[z_near].parent_idx = z_new;
 
 	// add new edge
-	insertTreeEdge( T, z_new, z_near ); 
+//	insertTreeEdge( T, z_new, z_near ); 
+	tree_add_edge( T, z_new, z_near );
 
 	return T;
 }

@@ -120,7 +120,7 @@ function iterateRRTStar() {
 	}
 
 
-	RRTStarOptimal = true;
+	RRTStarOptimal = false;
 	if (RRTStarOptimal) {
 		if ( z_new!='invalid' && euclideanDistance( z_new, q_goal ) < 0.2 ) {
 			z_final = z_new;
