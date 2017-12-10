@@ -243,13 +243,25 @@ function matrix_invert_affine(A) {
 function pivotize( mat ) {
 	// TODO: error checking if I care enough
 	
-	n = mat.length;
-	I = generate_identity(); // 4x4 hardcoded - change if necessary
-	for (var j=0; j<n; j++) {
-		
+	P = create_empty_matrix( mat.length, mat.length );
+	for (var i=0; i<mat.length; i++) P[i][i] = 1; // generate identity, essentially 
 
-
+	for (var j=0; j<mat.length; j++) {
+		var max=0;
+		for (var k=0; k<mat.length; k++) {
+			if (Math.abs(mat[k][j]) > max) {
+				max = Math.abs(mat[k][j]);
+				row = k;
+			}
+		}
+		if (j != row) {
+			var tmp = P[row];
+			P[row] = P[j];
+			P[j] = tmp;
+		}
 	}
+	
+	return P;
 }
 
 function LU_decomp( mat ) {
@@ -268,7 +280,7 @@ function LU_decomp( mat ) {
 			for (var k=0; k<i; k++) sum1 += U[k][j]*L[i][k];
 			U[i][j] = A2[i][j] - sum1;
 		}
-		for (var i=j; i<n; i++) {
+		for (var i=j; i<mat.length; i++) {
 			var sum2=0;
 			for (var k=0; k<j; k++) sum2 += U[k][j]*L[i][k];
 			L[i][j] = (A2[i][j] - sum2) / U[j][j];
@@ -279,9 +291,21 @@ function LU_decomp( mat ) {
 }
 
 
+function inverse_using_LU( L, U, P ) {
+	return (matrix_multiply_3( numeric.inv(U), numeric.inv(L), P ));
+}
 
+// solves Ax=b
+function linear_system_solver( A, b ) {
+	[L,U] = LU_decomp(A);
+	L = matrix_multiply( P,L ); // some places say this should be returned in the decomp - ??
 
+	// do general shit later
+	inter = matrix_multiply( numeric.inv(L), b );
+	x = matrix_multiply( numeric.inv(U), inter );
 
+	return x;
+}
 
 
 

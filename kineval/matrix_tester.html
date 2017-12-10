@@ -113,7 +113,6 @@ function run_test() {
 	A = matrix_multiply(B,A);
 	test_text = "mult [2;2] by [1 2;3 4]";
 	document.getElementById("text").innerHTML += "Generating "+test_text+": <br>"+matrix2string(A)+"<br><br>";
-*/
 
 	A = [0,1,2,3,4,5,6,6];
 	col = generate_column_matrix_from_array(A);
@@ -130,7 +129,19 @@ function run_test() {
 		 [2,1,0]];
 	matrix_pseudoinverse(A);
 	matrix_pseudoinverse(matrix_transpose(A));
+*/
 
+	A = [[1,0,2],
+		 [2,-1,3],
+		 [4,1,8]];
+	P = pivotize(A);
+	[L,U] = LU_decomp(A );
+	Ainv = inverse_using_LU( L,U,P );
+
+	b = [[-4],
+		 [-6],
+		 [-15]];
+	linear_system_solver( A, b );
 }
 
 
