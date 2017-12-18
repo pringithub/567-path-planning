@@ -23,11 +23,12 @@ Assignment 2 feature 9 (1.00/1): Pendularm_Verlet: CHECK
     comment: good work
 Assignment 2 feature 10 (2.00/2): Pendularm_RK4: CHECK
     comment: good work
-Assignment 2 feature 11 (0.00/3): Pendularm_Double: DUE
+Assignment 2 feature 11 (1.80/3): Pendularm_Double: PERCENT 60
     error: servo cannot be invoked
     comment: uncontrolled double pendulum motion is in place
     regrade: servo cannot be invoked
     comment: uncontrolled double pendulum motion is in place
+    regrade2: servo gain control should be documented
 Assignment 3 feature 12 (2.00/2): FK_MatrixRoutines: CHECK
     comment: good work
 Assignment 3 feature 13 (8.00/8): FK_Transforms: CHECK
@@ -60,22 +61,23 @@ Assignment 5 feature 26 (3.00/3): IK_JPseudoinverse: CHECK
     comment: good work
 Assignment 5 feature 27 (6.00/6): IK_EulerAngles: CHECK
     comment: good work
-Assignment 6 feature 28 (0.00/4): MotionPlan_Collision: PENDING
-    
-Assignment 6 feature 29 (0.00/2): MotionPlan_2DRRTConnect: PENDING
-    
-Assignment 6 feature 30 (0.00/6): MotionPlan_CSpaceRRTConnect: PENDING
-    
-Assignment 6 feature 31 (0.00/6): MotionPlan_RRTStar: PENDING
-    
-Assignment 7 feature 32 (0.00/12): Pitch: PENDING
-    
-Assignment 7 feature 33 (0.00/6): Pitch_Advanced: PENDING
-    
+Assignment 6 feature 28 (4.00/4): MotionPlan_Collision: CHECK
+    comment: good work
+Assignment 6 feature 29 (2.00/2): MotionPlan_2DRRTConnect: CHECK
+    comment: good work
+Assignment 6 feature 30 (0.00/6): MotionPlan_CSpaceRRTConnect: DUE
+    error: planner does not return motion path solution within expected time
+    comment: failure on private test
+Assignment 6 feature 31 (6.00/6): MotionPlan_RRTStar: CHECK
+    comment: good work
+Assignment 7 feature 32 (12.00/12): Pitch: CHECK
+    LYF.XTENDR
+Assignment 7 feature 33 (6.00/6): Pitch_Advanced: CHECK
+    LYF.XTENDR
 Assignment 8 feature 34 (0.00/4): Advanced: PENDING
     
 Quiz 1: 2.83 of 4
 Quiz 2: 2.50 of 4
 Quiz 3: 3.50 of 4
-Quiz 4: PENDING
-Quiz 5: PENDING
+Quiz 4: 1.08 of 4
+Quiz 5: 4.67 of 4
