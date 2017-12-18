@@ -287,23 +287,41 @@ function LU_decomp( mat ) {
 		}
 	}
 
-	return [L, U];
+	return [L, U, P];
 }
 
+// takes in L/U/P
+function inverse_using_LUP( L, U, P ) {
 
-function inverse_using_LU( L, U, P ) {
-	return (matrix_multiply_3( numeric.inv(U), numeric.inv(L), P ));
+	Linv = numeric.inv(L);//create_empty_matrix( L.length, L[0].length );
+	Uinv = numeric.inv(U);
+	for (var i=0; i<L.length; i++) {
+		for (var j=0; j<i; j++) {
+			Linv[i][j] = Linv[i][j];
+		}
+		Linv[i][j] = 1; // i==j here
+	}
+	
+	return (matrix_multiply_3( Uinv, Linv, P ));
+}
+
+function inverseLU(A) {
+	[L,U,P] = LU_decomp(A);
+	Ainv = inverse_using_LUP( L,U,P );
+	return Ainv;
 }
 
 // solves Ax=b
 function linear_system_solver( A, b ) {
-	[L,U] = LU_decomp(A);
+/*	[L,U] = LU_decomp(A);
 	L = matrix_multiply( P,L ); // some places say this should be returned in the decomp - ??
 
 	// do general shit later
 	inter = matrix_multiply( numeric.inv(L), b );
 	x = matrix_multiply( numeric.inv(U), inter );
-
+*/
+	Ainv = inverseLU(A);
+	x = matrix_multiply( Ainv, b );
 	return x;
 }
 

@@ -137,11 +137,20 @@ function run_test() {
 	P = pivotize(A);
 	[L,U] = LU_decomp(A );
 	Ainv = inverse_using_LU( L,U,P );
+	document.getElementById("text").innerHTML += "Generating inverse of : <br>"+matrix2string(A)+"<br><br>";
+	document.getElementById("text").innerHTML += "L = "+matrix2string(L)+"<br>";
+	document.getElementById("text").innerHTML += "U = "+matrix2string(U)+"<br>";
+	document.getElementById("text").innerHTML += "Ainv = "+matrix2string(Ainv)+"<br>";
+
 
 	b = [[-4],
 		 [-6],
 		 [-15]];
-	linear_system_solver( A, b );
+	x = linear_system_solver( A, b );
+	document.getElementById("text").innerHTML += "Solving when Ax = b: b = <br>"+matrix2string(b)+"<br>";
+	document.getElementById("text").innerHTML += "x = "+matrix2string(x)+"<br>";
+
+
 }
 
 

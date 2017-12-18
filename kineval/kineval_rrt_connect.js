@@ -151,7 +151,11 @@ function robot_rrt_planner_iterate() {
     //   tree_init - creates a tree of configurations
     //   tree_add_vertex - adds and displays new configuration vertex for a tree
     //   tree_add_edge - adds and displays new tree edge between configurations
-   
+  
+	// global defines
+	global_step_length = 1;
+	global_neighbor_range = 2*global_step_length;
+	euclidean_distance_to_goal = 2;
 
 	// xyz/rpy
 	ranges = [ [robot_boundary[0][0]-3, robot_boundary[1][0]+3],  
@@ -189,7 +193,7 @@ function robot_rrt_planner_iterate() {
 
 		if ( result[0] == 'advanced' ) {
 			q_new = result[1];
-			if ( euclideanDistance( q_new, q_goal_config ) < 0.5 ) {
+			if ( euclideanDistance( q_new, q_goal_config ) < euclidean_distance_to_goal ) {
 				// draw path 
 				closest_node = T_a.vertices[T_a.newest];
 				findPath( T_a, closest_node, 'RRT' );
@@ -265,7 +269,7 @@ function robot_rrt_planner_iterate() {
 
 		RRTStarOptimal = false;
 		if (RRTStarOptimal) {
-			if ( z_new!='invalid' && euclideanDistance( z_new, q_goal_config ) < 0.5 ) {
+			if ( z_new!='invalid' && euclideanDistance( z_new, q_goal_config ) < euclidean_distance_to_goal  ) {
 				z_final = z_new;
 			}
 			
@@ -281,7 +285,7 @@ function robot_rrt_planner_iterate() {
 			return "extended";
 		}
 		else {
-			if ( z_new!='invalid' && euclideanDistance( z_new, q_goal_config ) < 0.5 ) {
+			if ( z_new!='invalid' && euclideanDistance( z_new, q_goal_config ) < euclidean_distance_to_goal ) {
 				findPath( T_a, T_a.vertices[T_a.newest] ); // T.newest is z_new	
 				return "reached";
 			}
@@ -403,10 +407,6 @@ function tree_remove_edge(tree,q1_idx,q2_idx) {
     //   path_dfs
 
 
-
-global_step_length = 0.25;
-global_neighbor_range = 2*global_step_length;
-
 function extendRRT( T, q ) {
 	q_near_idx = findNearestNeighborIdxInTree( T, q );
     q_near = T.vertices[q_near_idx].vertex;
@@ -431,7 +431,7 @@ function connectRRT( T, q_target ) {
         result = extendRRT( T, q_target );
 
         q_new = result[1];
-        if ( euclideanDistance( q_new, q_target ) < 0.7 )
+        if ( euclideanDistance( q_new, q_target ) < euclidean_distance_to_goal )
             result = ['reached'];
 
     } while (result[0] == 'advanced');
