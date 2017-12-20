@@ -65,17 +65,20 @@ Assignment 6 feature 28 (4.00/4): MotionPlan_Collision: CHECK
     comment: good work
 Assignment 6 feature 29 (2.00/2): MotionPlan_2DRRTConnect: CHECK
     comment: good work
-Assignment 6 feature 30 (0.00/6): MotionPlan_CSpaceRRTConnect: DUE
+Assignment 6 feature 30 (4.80/6): MotionPlan_CSpaceRRTConnect: PERCENT 80
     error: planner does not return motion path solution within expected time
     comment: failure on private test
+    regrade: borderline planning performance with respect to time bound
 Assignment 6 feature 31 (6.00/6): MotionPlan_RRTStar: CHECK
     comment: good work
 Assignment 7 feature 32 (12.00/12): Pitch: CHECK
     LYF.XTENDR
 Assignment 7 feature 33 (6.00/6): Pitch_Advanced: CHECK
     LYF.XTENDR
-Assignment 8 feature 34 (0.00/4): Advanced: PENDING
-    
+Assignment 8 feature 34 (2.00/4): Advanced: PERCENT 50
+    FK_CustomRobot
+    IK_100in60
+    FK_LU: run-time error
 Quiz 1: 2.83 of 4
 Quiz 2: 2.50 of 4
 Quiz 3: 3.50 of 4
