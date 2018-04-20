@@ -39,10 +39,10 @@ kineval.randomizeIKtrial = function randomIKtrial () {
     kineval.params.trial_ik_random.time = cur_time.getTime()-kineval.params.trial_ik_random.start.getTime();
 
 	if (kineval.params.go_ahead == 10) {
-		kineval.params.go_ahead = 0;i
+		kineval.params.go_ahead = 0;
 //		var currentTime = new Date().getTime();
 //		while (currentTime + 200 >= new Date().getTime()) {
-		}
+//		}
 	}
 	else {
 		kineval.params.go_ahead++;
