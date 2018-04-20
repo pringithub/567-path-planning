@@ -59,6 +59,54 @@ kineval.init = function init() {
 
     // call user's initialization
     my_init();
+
+
+	// ADDED BY PHIL: 4/20/18
+	//readandsave_handpos_csv();
+//	csv_file = '../all_mus.dat'
+//	kineval.ik_data = $.csv.toObjects(csv_file)
+//	$(document).ready(function() {
+	$.ajax({
+		type: "GET",
+		url: "all_mus.dat",
+		dataType: "text",
+		success: function(data) {processData(data);},
+//		failure: console.log('lol')
+		error: function(xhr, status, error) {
+		  var err = eval("(" + xhr.responseText + ")");
+		  alert(err.Message);
+		}
+	 });
+//	});
+
+	function processData(allText) {
+		var allTextLines = allText.split(/\r\n|\n/);
+		var headers = allTextLines[0].split(',');
+		var lines = [];
+
+		for (var i=1; i<allTextLines.length; i++) {
+			var data = allTextLines[i].split(',');
+			if (data.length == headers.length) {
+
+				var tarr = [];
+				for (var j=0; j<headers.length; j++) {
+					if (j==0)
+						tarr.push((1/131)*Number(data[j]));//headers[j]+":"+data[j]);
+					else 
+						tarr.push((1/131)*Number(data[j])+1);//headers[j]+":"+data[j]);
+				}
+				lines.push(tarr);
+			}
+		}
+//		alert(lines);
+		console.log(lines);
+		kineval.ik_data = lines;
+	}
+	kineval.ik_number = 0;
+	kineval.params.persist_ik = true;
+	kineval.params.ik_steplength = 0.80;
+	//kineval.params.trial_ik_random.execute = true;
+	kineval.params.go_ahead = 0;
 }
 
 //////////////////////////////////////////////////
