@@ -38,14 +38,16 @@ kineval.randomizeIKtrial = function randomIKtrial () {
     cur_time = new Date();
     kineval.params.trial_ik_random.time = cur_time.getTime()-kineval.params.trial_ik_random.start.getTime();
 
-	if (kineval.params.go_ahead == 10) {
-		kineval.params.go_ahead = 0;
+	    	
+	
+//	if (kineval.params.go_ahead == 1000) {
+//		kineval.params.go_ahead = 0;
 //		var currentTime = new Date().getTime();
 //		while (currentTime + 200 >= new Date().getTime()) {
 //		}
-	}
-	else {
-		kineval.params.go_ahead++;
+//	}
+//	else {
+//		kineval.params.go_ahead++;
 
 		console.log(kineval.params.trial_ik_random.time)
 
@@ -60,14 +62,14 @@ kineval.randomizeIKtrial = function randomIKtrial () {
 
 	   // if target reached, increment scoring and generate new target location
 		// KE 2 : convert hardcoded constants into proper parameters
-	//    if (kineval.params.trial_ik_random.distance_current < 0.01) {
+	    if (kineval.params.trial_ik_random.distance_current < 0.1) {
 			kineval.params.ik_target.position[0][0] = kineval.ik_data[kineval.params.trial_ik_random.targets][0];  //1.2*(Math.random()-0.5);
 			kineval.params.ik_target.position[1][0] = kineval.ik_data[kineval.params.trial_ik_random.targets][1];  //1.2*(Math.random()-0.5)+1.5;
 			kineval.params.ik_target.position[2][0] = 0.75;//0.7*(Math.random()-0.5)+0.5;
 			kineval.params.trial_ik_random.targets += 1;
 			textbar.innerHTML = "IK trial Random: target " + kineval.params.trial_ik_random.targets + " reached at time " + kineval.params.trial_ik_random.time;
-	//    }
-	}
+	    }
+//	}
 
 }
 
